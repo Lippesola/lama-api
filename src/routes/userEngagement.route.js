@@ -5,8 +5,8 @@ module.exports = app => {
     var router = require("express").Router();
   
 	router.get('/', keycloak.protect(), UserEngagement.findAll);
-	router.get('/:year/:uuid', keycloak.protect(), UserEngagement.findOne);
-	router.post('/:year/:uuid', keycloak.protect(), UserEngagement.createOrUpdate);
+	router.get('/:uuid/:year', keycloak.protect(), UserEngagement.findOne);
+	router.post('/:uuid/:year', keycloak.protect(), UserEngagement.createOrUpdate);
 
     app.use('/userEngagement', router);
   };
