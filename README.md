@@ -1,6 +1,4 @@
-# lama-api
-🦙 Lippesola Administration und Mitarbeiter Anmeldung - API
-# Mitarbeiter-Bereich (mab-fe)
+# 🦙 Lippesola Administration und Mitarbeiter Anmeldung - API
 
 Mitarbeiter Bereich vom Lippesola
 
