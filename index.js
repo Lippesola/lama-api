@@ -18,7 +18,7 @@ async function initSequelize() {
 }
 
 var corsOptions = {
-  origin: "http://localhost:9000"
+  origin: process.env.LAMA_APP_URL || "http://localhost:9000"
 };
 
 app.use(cors(corsOptions));

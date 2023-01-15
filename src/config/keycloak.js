@@ -4,10 +4,10 @@ var Keycloak = require('keycloak-connect');
 let _keycloak;
 
 var keycloakConfig = {
-    clientId: 'mab',
+    clientId: process.env.KEYCLOAK_CLIENTID || 'lama-api',
     bearerOnly: true,
-    serverUrl: 'https://account.lippesola.de/auth',
-    realm: 'Lippesola.de'
+    serverUrl: process.env.KEYCLOAK_URL || 'https://account.lippesola.de',
+    realm: process.env.KEYCLOAK_REALM || 'Lippesola.de'
 };
 
 function initKeycloak() {
