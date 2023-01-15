@@ -5,7 +5,7 @@
 
 ## Environment Variables
 
-|Environment Variable|Discription|Example / possible values|
+|Environment Variable|Description|Example / possible values|
 |------|------|-------|
 |DB_HOST| Host of the Database Server|`localhost`,`192.168.1.23:3306`, `172.16.2.45:5432`
 |DB_USER| Database user|lamauser
