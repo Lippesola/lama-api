@@ -16,4 +16,6 @@ RUN npm install
 COPY . .
 
 EXPOSE 8080
-CMD [ "node", "server.js" ]
+ENTRYPOINT [ "node", "index.js" ]
+
+LABEL org.opencontainers.image.source="https://github.com/Lippesola/lama-api"
