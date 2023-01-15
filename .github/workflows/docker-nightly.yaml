@@ -12,11 +12,11 @@ jobs:
 
     steps:
     - uses: actions/checkout@v3
-    - name: Build the Docker image
-      run: docker build . --file Dockerfile --tag ghcr.io/lippesola/lama-api:nightly
     - name: Login to ghcr.io
-      run: echo $GITHUB_TOKENB | docker login ghcr.io -u lippesola --password-stdin
+      run: echo $GITHUB_TOKEN | docker login ghcr.io -u lippesola --password-stdin
       env:
         GITHUB_TOKEN: ${{ github.token }}
+    - name: Build the Docker image
+      run: docker build . --file Dockerfile --tag ghcr.io/lippesola/lama-api:nightly
     - name: Push the Docker image
       run: docker push ghcr.io/lippesola/lama-api:nightly
