@@ -10,7 +10,6 @@ exports.findOne = async (req, res) => {
 	}
   const filePath = __dirname + '/../../upload/avatar/' + req.params.uuid + '.jpeg';
   if (fs.existsSync(filePath)) {
-    console.log("HALLO");
 		res.sendFile(path.resolve(filePath))
 	} else {
 		res.status(404).send('not found')
@@ -19,6 +18,7 @@ exports.findOne = async (req, res) => {
 
 exports.createOrUpdate = (req, res) => {
   const { image } = req.files;
+  console.log(req.files);
   const executingUser = req.kauth.grant.access_token.content.sub
   const isAdmin = req.kauth.grant.access_token.content.realm_access.roles.includes('admin')
 

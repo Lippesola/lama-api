@@ -9,4 +9,5 @@ module.exports = app => {
 	router.post('/:id', keycloak.protect(), Event.createOrUpdate);
 
     app.use('/event', router);
+    
   };
