@@ -1,4 +1,7 @@
-# 🦙 Lippesola Administration und Mitarbeiter Anmeldung - API
+# LAMA API
+🦙 Lippesola Administration und Mitarbeiter Anmeldung backend
+
+----
 
 ## Install the dependencies
 ```bash
