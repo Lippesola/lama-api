@@ -1,12 +1,10 @@
-module.exports = app => {
-    const keycloak = require('../config/keycloak.js').getKeycloak();
-    const UserMotivation = require("../controllers/userMotivation.controller.js");
+import { Router } from 'express';
+import keycloak from '../config/keycloak.js';
+import { findOne, createOrUpdate } from '../controllers/userMotivation.controller.js'
 
-    var router = require("express").Router();
-  
-	// router.get('/', keycloak.protect(), UserMotivation.findAll);
-	router.get('/:uuid', UserMotivation.findOne);
-	router.post('/:uuid', keycloak.protect(), UserMotivation.createOrUpdate);
+var router = new Router();
 
-    app.use('/userMotivation', router);
-  };
+    router.get('/:uuid', keycloak.protect(), findOne);
+    router.post('/:uuid', keycloak.protect(), createOrUpdate);
+
+export default router

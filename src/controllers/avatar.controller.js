@@ -1,14 +1,15 @@
-const keycloak = require('../config/keycloak.js').getKeycloak();
-const fs = require('fs')
-const path = require('path')
+import fs from 'fs'
+import path from 'path'
+import { fileURLToPath } from 'url';
 
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
-exports.findOne = async (req, res) => {
+export async function findOne (req, res) { 
 	if (!req.params && !req.params.uuid) {
 		res.status(400).send('bad request')
 		return;
 	}
-  const filePath = __dirname + '/../../upload/avatar/' + req.params.uuid + '.jpeg';
+  const filePath = __dirname + '/../../uploads/avatar/' + req.params.uuid + '.jpeg';
   if (fs.existsSync(filePath)) {
 		res.sendFile(path.resolve(filePath))
 	} else {
@@ -16,7 +17,7 @@ exports.findOne = async (req, res) => {
 	}
 }
 
-exports.createOrUpdate = (req, res) => {
+export function createOrUpdate(req, res) { 
   const { image } = req.files;
   console.log(req.files);
   const executingUser = req.kauth.grant.access_token.content.sub
@@ -38,6 +39,6 @@ exports.createOrUpdate = (req, res) => {
     return res.sendStatus(400)
   }
 
-  image.mv(__dirname + '/../../upload/avatar/' + req.params.uuid + '.jpeg');
+  image.mv(__dirname + '/../../uploads/avatar/' + req.params.uuid + '.jpeg');
   res.sendStatus(200);
 };

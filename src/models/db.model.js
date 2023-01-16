@@ -1,5 +1,5 @@
-const { Sequelize } = require("sequelize")
-const db = require("../config/db.js");
+import Sequelize from "sequelize";
+import db from '../config/db.js'
 
 const sequelize = new Sequelize(
   db.DB,
@@ -11,4 +11,4 @@ const sequelize = new Sequelize(
   }
 )
 
-module.exports = sequelize;
+export default sequelize;

@@ -1,7 +1,7 @@
-const { DataTypes, UUID } = require('sequelize')
-const sequelize = require("./db.model.js")
+import { DataTypes } from 'sequelize';
+import sequelize from './db.model.js';
 
-module.exports = sequelize.define('UserYear', {
+export default sequelize.define('UserYear', {
   uuid: {
     type: DataTypes.UUID,
     primaryKey: true

@@ -1,7 +1,7 @@
-const express = require("express");
-const fileupload = require('express-fileupload')
-const cors = require("cors");
-const sequelize = require("./src/models/db.model")
+import express from 'express'
+import fileupload from 'express-fileupload'
+import cors from 'cors'
+import sequelize from './src/models/db.model.js';
 
 const app = express();
 
@@ -31,21 +31,32 @@ app.use(express.json());
 // parse requests of content-type - application/x-www-form-urlencoded
 app.use(express.urlencoded({ extended: true }));
 
-// simple route
-app.get("/", (req, res) => {
-  res.json({ message: "up" });
-});
+// unprotected routes
+import { registration } from './src/controllers/registration.controller.js';
+app.get("/", (req, res) => {res.json({ message: "up" });});
+app.post('/registration', registration)
 
-const keycloak = require('./src/config/keycloak.js').initKeycloak();
-app.use(keycloak.middleware());
+// protected routes
+import keycloak from './src/config/keycloak.js'
+app.use(keycloak.middleware())
 
-require("./src/routes/avatar.route.js")(app);
-require("./src/routes/event.route.js")(app);
-require("./src/routes/user.route.js")(app);
-require("./src/routes/userEngagement.route.js")(app);
-require("./src/routes/userTask.route.js")(app); 
-require("./src/routes/userYear.route.js")(app); 
-require("./src/routes/setting.route.js")(app);
+import avatarRouter from './src/routes/avatar.route.js'
+import eventRouter from './src/routes/event.route.js'
+import settingRouter from './src/routes/setting.route.js'
+import miscRouter from './src/routes/misc.route.js'
+import userRouter from './src/routes/user.route.js'
+import userEngagementRouter from './src/routes/userEngagement.route.js'
+import userTaskRouter from './src/routes/userTask.route.js'
+import userYearRouter from './src/routes/userYear.route.js'
+
+app.use('/avatar', avatarRouter);
+app.use('/event', eventRouter);
+app.use('/setting', settingRouter);
+app.use('/misc', miscRouter);
+app.use('/user', userRouter);
+app.use('/userEngagement', userEngagementRouter);
+app.use('/userTask', userTaskRouter);
+app.use('/userYear', userYearRouter);
 
 // set port, listen for requests
 const PORT = process.env.PORT || 8080;

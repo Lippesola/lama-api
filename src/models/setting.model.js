@@ -1,7 +1,7 @@
-const { DataTypes } = require('sequelize')
-const sequelize = require("./db.model.js")
+import { DataTypes } from 'sequelize';
+import sequelize from './db.model.js';
 
-module.exports = sequelize.define('Setting', {
+export default sequelize.define('Setting', {
   key: {
     type: DataTypes.STRING,
     primaryKey: true

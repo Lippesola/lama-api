@@ -1,9 +1,9 @@
-const keycloak = require('../config/keycloak.js').getKeycloak();
-const fs = require('fs')
-const path = require('path')
+import keycloak from '../config/keycloak.js';
+import fs from 'fs'
+import path from 'path';
 
 
-exports.findOne = async (req, res) => {
+export async function findOne(req, res) {
 	if (!req.params && !req.params.uuid && !req.params.year) {
 		res.status(400).send('bad request')
 		return;
@@ -21,7 +21,7 @@ exports.findOne = async (req, res) => {
   }
 }
 
-exports.createOrUpdate = async (req, res) => {
+export async function createOrUpdate(req, res) {
   const { file } = req.files;
   const executingUser = req.kauth.grant.access_token.content.sub
   const isAdmin = req.kauth.grant.access_token.content.realm_access.roles.includes('admin')
@@ -47,7 +47,7 @@ exports.createOrUpdate = async (req, res) => {
   const userTask = await userTaskModel.findOne({where: {uuid: req.params.uuid, year: req.params.year}})
 	if (userTask) {
 		userTaskModel.update({hash: file.md5}, {where: {uuid: req.params.uuid, year: req.params.year}});
-		res.status(200).json(userTask)
+		res.status(200).send(userTask)
 	} else {
 		var data = {
       uuid: req.params.uuid,
@@ -55,7 +55,7 @@ exports.createOrUpdate = async (req, res) => {
       hash: file.md5
     }
 		userTaskModel.create(data)
-		res.status(200).json(userTask)
+		res.status(200).send(userTask)
 	}
 
 

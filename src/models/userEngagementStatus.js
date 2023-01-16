@@ -1,4 +1,4 @@
-exports = userEngagementStatus = {
+export default {
     type: {
       team: 0,
       teen: 1,

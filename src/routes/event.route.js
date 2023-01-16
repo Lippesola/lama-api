@@ -1,13 +1,11 @@
-module.exports = app => {
-    const keycloak = require('../config/keycloak.js').getKeycloak();
-    const Event = require("../controllers/event.controller.js");
+import { Router } from 'express';
+import keycloak from '../config/keycloak.js';
+import { findAll, findOne, createOrUpdate } from '../controllers/event.controller.js'
 
-    var router = require("express").Router();
+var router = new Router();
   
-	router.get('/', keycloak.protect(), Event.findAll);
-	router.get('/:id', keycloak.protect(), Event.findOne);
-	router.post('/:id', keycloak.protect(), Event.createOrUpdate);
+	router.get('/', keycloak.protect(), findAll);
+	router.get('/:id', keycloak.protect(), findOne);
+	router.post('/:id', keycloak.protect(), createOrUpdate);
 
-    app.use('/event', router);
-    
-  };
+export default router
