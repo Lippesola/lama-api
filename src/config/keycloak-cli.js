@@ -6,7 +6,7 @@ const kcAdminClient = new KcAdminClient({
 
 await kcAdminClient.auth({
     username: process.env.KEYCLOAK_ADMIN_USER || 'admin-lama',
-    password: process.env.KEYCLOAK_ADMIN_PASS || 'CMSp!CtxG75@EqR@v48dJhK79N#h^x7x',
+    password: process.env.KEYCLOAK_ADMIN_PASS || 'top-secret',
     grantType: 'password',
     clientId: process.env.KEYCLOAK_ADMIN_CLIENTID || 'admin-cli'
 });

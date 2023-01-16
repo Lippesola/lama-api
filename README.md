@@ -20,4 +20,7 @@ LAMA API needs persistant storage under `/lama-api/uploads`
 |KEYCLOAK_CLIENTID|OIDC Client ID|lama
 |KEYCLOAK_URL| Keycloak Base URL| https://keycloak.example.com/auth|
 |KEYCLOAK_REALM| Realm in Keycloak to use| `Lippesola`
+|KEYCLOAK_ADMIN_USER| Keycloak admin username| `lamadmin`
+|KEYCLOAK_ADMIN_PASS| Keycloak admin username| `top-secret`
+|KEYCLOAK_ADMIN_CLIENTID| Keycloak admin clientId| `admin-cli`
 |LAMA_APP_URL| Frontend URL of LAMA| https://lama.example.com, https://example.com/lama
