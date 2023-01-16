@@ -2,6 +2,11 @@
 🦙 Lippesola Administration und Mitarbeiter Anmeldung backend
 
 ----
+## Deploy
+
+### Volumes
+LAMA API needs persistant storage under `/lama-api/uploads`
+
 
 ## Environment Variables
 
