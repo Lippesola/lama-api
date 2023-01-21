@@ -14,6 +14,7 @@ async function initSequelize() {
 	  
 	  } catch (error) {
 		console.error('Unable to connect to the database:', error);
+		setTimeout(initSequelize, 5000)
 	  }	
 }
 
@@ -46,6 +47,7 @@ import settingRouter from './src/routes/setting.route.js'
 import miscRouter from './src/routes/misc.route.js'
 import userRouter from './src/routes/user.route.js'
 import userEngagementRouter from './src/routes/userEngagement.route.js'
+import userMotivation from './src/routes/userMotivation.route.js'
 import userTaskRouter from './src/routes/userTask.route.js'
 import userYearRouter from './src/routes/userYear.route.js'
 
@@ -55,6 +57,7 @@ app.use('/setting', settingRouter);
 app.use('/misc', miscRouter);
 app.use('/user', userRouter);
 app.use('/userEngagement', userEngagementRouter);
+app.use('/userMotivation', userMotivation);
 app.use('/userTask', userTaskRouter);
 app.use('/userYear', userYearRouter);
 

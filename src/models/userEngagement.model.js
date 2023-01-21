@@ -10,82 +10,172 @@ export default sequelize.define('UserEngagement', {
     type: DataTypes.INTEGER,
     primaryKey: true
   },
-  type: {
-    type: DataTypes.TINYINT
-  },
-  status: {
-    type: DataTypes.TINYINT
-  },
   build: {
-    type: DataTypes.TINYINT
+    type: DataTypes.TINYINT,
+    validate: {
+      min: 0,
+      max: 2
+    }
   },
   cleanup: {
-    type: DataTypes.TINYINT
+    type: DataTypes.TINYINT,
+    validate: {
+      min: 0,
+      max: 2
+    }
   },
   teens: {
-    type: DataTypes.TINYINT
+    type: DataTypes.TINYINT,
+    validate: {
+      min: 0,
+      max: 3
+    }
   },
   kids: {
-    type: DataTypes.TINYINT
+    type: DataTypes.TINYINT,
+    validate: {
+      min: 0,
+      max: 3
+    }
   },
   prepare1: {
-    type: DataTypes.TINYINT
+    type: DataTypes.TINYINT,
+    validate: {
+      min: 0,
+      max: 3
+    }
   },
   prepare2: {
-    type: DataTypes.TINYINT
+    type: DataTypes.TINYINT,
+    validate: {
+      min: 0,
+      max: 3
+    }
   },
   prepare3: {
-    type: DataTypes.TINYINT
+    type: DataTypes.TINYINT,
+    validate: {
+      min: 0,
+      max: 3
+    }
   },
   training: {
-    type: DataTypes.TINYINT
+    type: DataTypes.TINYINT,
+    validate: {
+      min: 0,
+      max: 3
+    }
   },
   driver: {
-    type: DataTypes.TINYINT
+    type: DataTypes.TINYINT,
+    validate: {
+      min: 0,
+      max: 4
+    }
   },
   groupLeader: {
-    type: DataTypes.TINYINT
+    type: DataTypes.TINYINT,
+    validate: {
+      min: 0,
+      max: 1
+    }
   },
   trainer: {
-    type: DataTypes.TINYINT
+    type: DataTypes.TINYINT,
+    validate: {
+      min: 0,
+      max: 1
+    }
   },
   dayLeader: {
-    type: DataTypes.TINYINT
+    type: DataTypes.TINYINT,
+    validate: {
+      min: 0,
+      max: 1
+    }
   },
   dayTeamLeader: {
-    type: DataTypes.TINYINT
+    type: DataTypes.TINYINT,
+    validate: {
+      min: 0,
+      max: 1
+    }
   },
   guitar: {
-    type: DataTypes.TINYINT
+    type: DataTypes.TINYINT,
+    validate: {
+      min: 0,
+      max: 3
+    }
   },
   singing: {
-    type: DataTypes.TINYINT
+    type: DataTypes.TINYINT,
+    validate: {
+      min: 0,
+      max: 1
+    }
   },
   band: {
-    type: DataTypes.TINYINT
+    type: DataTypes.TINYINT,
+    validate: {
+      min: 0,
+      max: 1
+    }
   },
   drama: {
-    type: DataTypes.TINYINT
+    type: DataTypes.TINYINT,
+    validate: {
+      min: 0,
+      max: 2
+    }
   },
   wishTent: {
-    type: DataTypes.TINYINT
+    type: DataTypes.TINYINT,
+    validate: {
+      min: 0,
+      max: 3
+    }
   },
   wishKitchen: {
-    type: DataTypes.TINYINT
+    type: DataTypes.TINYINT,
+    validate: {
+      min: 0,
+      max: 3
+    }
   },
   wishOffice: {
-    type: DataTypes.TINYINT
+    type: DataTypes.TINYINT,
+    validate: {
+      min: 0,
+      max: 3
+    }
   },
   wishMedia: {
-    type: DataTypes.TINYINT
+    type: DataTypes.TINYINT,
+    validate: {
+      min: 0,
+      max: 3
+    }
   },
   wishMedic: {
-    type: DataTypes.TINYINT
+    type: DataTypes.TINYINT,
+    validate: {
+      min: 0,
+      max: 3
+    }
   },
   wishInfrastructure: {
-    type: DataTypes.TINYINT
+    type: DataTypes.TINYINT,
+    validate: {
+      min: 0,
+      max: 3
+    }
   },
   wishOther: {
-    type: DataTypes.TINYINT
+    type: DataTypes.TINYINT,
+    validate: {
+      min: 0,
+      max: 3
+    }
   }
 });

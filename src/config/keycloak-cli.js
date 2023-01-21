@@ -4,11 +4,15 @@ const kcAdminClient = new KcAdminClient({
     realmName: process.env.KEYCLOAK_REALM || 'Lippesola.de',
 });
 
-await kcAdminClient.auth({
+const credentials = {
     username: process.env.KEYCLOAK_ADMIN_USER || 'admin-lama',
     password: process.env.KEYCLOAK_ADMIN_PASS || 'top-secret',
     grantType: 'password',
     clientId: process.env.KEYCLOAK_ADMIN_CLIENTID || 'admin-cli'
-});
+}
+
+await kcAdminClient.auth(credentials);
+
+setInterval(() => kcAdminClient.auth(credentials), 58 * 1000); // 58 seconds
 
 export default kcAdminClient

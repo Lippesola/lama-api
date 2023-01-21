@@ -6,6 +6,6 @@ var router = new Router();
   
 	router.get('/', keycloak.protect(), findAll);
 	router.get('/:id', keycloak.protect(), findOne);
-	router.post('/:id', keycloak.protect(), createOrUpdate);
+	router.post('/:id', keycloak.protect(['admin']), createOrUpdate);
 
 export default router

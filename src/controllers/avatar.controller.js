@@ -5,8 +5,8 @@ import { fileURLToPath } from 'url';
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
 export async function findOne (req, res) { 
-	if (!req.params && !req.params.uuid) {
-		res.status(400).send('bad request')
+  if (!req.params && !req.params.uuid) {
+    res.status(400).send('bad request')
 		return;
 	}
   const filePath = __dirname + '/../../uploads/avatar/' + req.params.uuid + '.jpeg';
@@ -21,7 +21,7 @@ export function createOrUpdate(req, res) {
   const { image } = req.files;
   console.log(req.files);
   const executingUser = req.kauth.grant.access_token.content.sub
-  const isAdmin = req.kauth.grant.access_token.content.realm_access.roles.includes('admin')
+  const isAdmin = req.kauth.grant.access_token.content.groups.includes('admin')
 
   if (req.params.uuid !== executingUser && !isAdmin) {
     return res.status(403).send({

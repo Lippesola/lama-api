@@ -14,14 +14,26 @@ export async function registration(req, res) {
 	username = username.replaceAll('ß', 'ss')
 	username = username.replaceAll(' ', '-')
 
-	kcAdminClient.users.find({
+	const password = Math.random().toString(36).slice(-8);
+
+	kcAdminClient.users.create({
 		email: req.body.mail,
 		firstName: req.body.firstName,
 		lastName: req.body.lastName,
 		username: username,
+		enabled: true,
+		requiredActions: ['UPDATE_PASSWORD'],
+		credentials: [{
+			value: password,
+			type: 'password'
+		}]
 	}).then(function(response) {
 		const uuid = response.id
-		res.status(200).send({uuid: uuid})
+		res.status(200).send({
+			uuid: uuid,
+			username: username,
+			password: password
+		})
 		let user = UserModel.create({
 			uuid: uuid,
 			firstName: req.body.firstName,

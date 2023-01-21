@@ -4,7 +4,6 @@ import Keycloak from 'keycloak-connect'
 let _keycloak;
 
 var keycloakConfig = {
-    clientId: process.env.KEYCLOAK_CLIENTID || 'lama-api',
     bearerOnly: true,
     serverUrl: process.env.KEYCLOAK_URL || 'https://account.lippesola.de/auth',
     realm: process.env.KEYCLOAK_REALM || 'Lippesola.de'

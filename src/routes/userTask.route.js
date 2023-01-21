@@ -4,8 +4,8 @@ import { findAll, findOne, createOrUpdate } from '../controllers/userTask.contro
 
 var router = new Router();
 
-    router.get('/', keycloak.protect(), findAll);
-    router.get('/:uuid/:year', keycloak.protect(), findOne);
-    router.post('/:uuid/:year', keycloak.protect(), createOrUpdate);
+    router.get('/', keycloak.protect(['admin']), findAll);
+    router.get('/:uuid/:year', keycloak.protect(['admin']), findOne);
+    router.post('/:uuid/:year', keycloak.protect(['admin']), createOrUpdate);
 
 export default router
