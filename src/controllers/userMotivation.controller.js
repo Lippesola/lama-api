@@ -33,7 +33,7 @@ export async function findOne(req, res) {
 export async function createOrUpdate(req, res) {
   const { file } = req.files;
   const self = req.kauth.grant.access_token.content.sub === req.params.uuid
-  if ('!self') {
+  if (!self) {
 		res.status(403).send()
 		return;
   }
