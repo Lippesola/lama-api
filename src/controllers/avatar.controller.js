@@ -5,7 +5,7 @@ import { fileURLToPath } from 'url';
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
 export async function findOne (req, res) { 
-  if (!req.params && !req.params.uuid) {
+  if (!req.params || !req.params.uuid) {
     res.status(400).send('bad request')
 		return;
 	}
@@ -19,7 +19,6 @@ export async function findOne (req, res) {
 
 export function createOrUpdate(req, res) { 
   const { image } = req.files;
-  console.log(req.files);
   const executingUser = req.kauth.grant.access_token.content.sub
   const isAdmin = req.kauth.grant.access_token.content.groups.includes('admin')
 
@@ -35,7 +34,6 @@ export function createOrUpdate(req, res) {
   }
   
   if (!image.mimetype.includes('image/')) {
-    console.log(req.files)
     return res.sendStatus(400)
   }
 

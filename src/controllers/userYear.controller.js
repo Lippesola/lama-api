@@ -1,18 +1,38 @@
 import kcAdminClient from "../config/keycloak-cli.js";
-import UserYearModel from '../models/userYear.model.js'
+import userYearModel from '../models/userYear.model.js'
 import keycloak from '../config/keycloak.js';
+import settingModel from "../models/setting.model.js";
+import userModel from "../models/user.model.js";
 
 export async function findAll(req, res) {
-	const userYear = await UserYearModel.findAll({where: req.query})
-	res.status(200).send(userYear)
+	const year = req.query.year || await settingModel.findByPk('currentYear')
+	const isLT = req.kauth.grant.access_token.content.groups.includes(year + '_LT')
+	if (!isLT) {
+		res.status(403).send()
+		return;
+	}
+	let data = {}
+	if (typeof req.query.userBundle !== 'undefined') {
+		data['include'] = {
+			model: userModel
+		}
+	}
+	delete req.query.userBundle
+	data['where'] = req.query
+	try {
+		const userYear = await userYearModel.findAll(data)
+		res.status(200).send(userYear)
+	} catch(e) {
+		res.status(400).send()
+	}
 }
 
 export async function findOne(req, res) {
-	if (!req.params && !req.params.uuid && !req.params.year) {
+	if (!req.params || !req.params.uuid || !req.params.year) {
 		res.status(400).send('bad request')
 		return;
 	}
-	const userYear = await UserYearModel.findOne({where: {uuid: req.params.uuid, year: req.params.year}})
+	const userYear = await userYearModel.findOne({where: {uuid: req.params.uuid, year: req.params.year}})
 	if (userYear) {
 		res.status(200).send(userYear)
 	} else {
@@ -21,26 +41,25 @@ export async function findOne(req, res) {
 }
 
 export async function createOrUpdate(req, res) {
-	if (!req.params && !req.params.uuid && !req.params.year) {
+	if (!req.params || !req.params.uuid || !req.params.year) {
 		res.status(400).send('bad request')
 		return;
 	}
-	const userYear = await UserYearModel.findOne({where: {uuid: req.params.uuid, year: req.params.year}})
+	const year = req.params.year || (await SettingModel.findByPk('currentYear')).value
+	const isLT = req.kauth.grant.access_token.content.groups.includes(year + '_LT')
+	const self = req.kauth.grant.access_token.content.sub === req.params.uuid
+	if (!isLT && !self) {
+		res.status(403).send()
+		return;
+	}
+	const userYear = await userYearModel.findOne({where: {uuid: req.params.uuid, year: year}})
 	var data = req.body
-	data.editedBy = req.kauth.grant.access_token.content.sub
-	console.log(req.kauth.grant.access_token.content);
 	if (userYear) {
-		if (req.body.status === 4) {
-			let isLT = false;
-			console.log('ASDF');
-			(await kcAdminClient.users.listGroups({id: req.params.uuid})).forEach((group) => {
-				console.log(group.name);
-				console.log(req.params.year + '_LT');
-				if (group.name === req.params.year + '_LT') {
-					isLT = true
-				}
-			})
-			console.log('ASDF');
+		if (userYear.status === 2) {
+			data['status'] = 3;
+		}
+		// activate user
+		if (userYear.status !== 4 && req.body.status === 4) {
 			if (!isLT) {
 				res.status(403).send('Du musst im LT sein, um Leute freischalten zu können')
 				return;
@@ -59,13 +78,10 @@ export async function createOrUpdate(req, res) {
 				id: req.params.uuid,
 				groupId: groupId
 			})
-			UserYearModel.update(data, {where: {uuid: req.params.uuid, year: req.params.year}});
 		}
+		userYearModel.update(data, {where: {uuid: req.params.uuid, year: req.params.year}});
 		res.status(200).send(userYear)
 	} else {
-		data.uuid = req.params.uuid
-		data.year = req.params.year
-		UserYearModel.create(data)
-		res.status(200).send(userYear)
+		res.status(400).send()
 	}
 }

@@ -1,17 +1,21 @@
-import SettingModel from '../models/setting.model.js'
+import settingModel from '../models/setting.model.js'
 import keycloak from '../config/keycloak.js';
 
 export async function findAll(req, res) {
-	const setting = await SettingModel.findAll({where: req.params})
-	res.status(200).send(setting)
+	try {
+		const setting = await settingModel.findAll({where: req.query})
+		res.status(200).send(setting)
+	} catch(e) {
+		res.status(400).send()
+	}
 }
 
 export async function findOne(req, res) {
-	if (!req.params && !req.params.key) {
+	if (!req.params || !req.params.key) {
 		res.status(400).send('bad request')
 		return;
 	}
-	const setting = await SettingModel.findByPk(req.params.key)
+	const setting = await settingModel.findByPk(req.params.key)
 	if (setting) {
 		res.status(200).send(setting)
 	} else {
@@ -20,18 +24,18 @@ export async function findOne(req, res) {
 }
 
 export async function createOrUpdate(req, res) {
-	if (!req.params && !req.params.key) {
+	if (!req.params || !req.params.key) {
 		res.status(400).send('bad request')
 		return;
 	}
-	const setting = await SettingModel.findByPk(req.params.key)
+	const setting = await settingModel.findByPk(req.params.key)
 	if (setting) {
-		SettingModel.update(req.body, {where: {key: req.params.key}});
+		settingModel.update(req.body, {where: {key: req.params.key}});
 		res.status(200).send(setting)
 	} else {
 		var data = req.body
 		data.key = req.params.key
-		SettingModel.create(data)
+		settingModel.create(data)
 		res.status(200).send(setting)
 	}
 }

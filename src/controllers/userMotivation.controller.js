@@ -1,6 +1,5 @@
-import UserMotivationModel from '../models/userMotivation.model.js'
-import UserYearModel from '../models/userYear.model.js'
-import SettingModel from '../models/setting.model.js'
+import userYearModel from '../models/userYear.model.js'
+import settingModel from '../models/setting.model.js'
 import fs from 'fs'
 import path from 'path'
 import { fileURLToPath } from 'url';
@@ -8,13 +7,19 @@ import { fileURLToPath } from 'url';
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
 export async function findOne(req, res) {
-	if (!req.params && !req.params.uuid && !req.params.year) {
+	if (!req.params || !req.params.uuid || !req.params.year) {
 		res.status(400).send('bad request')
 		return;
 	}
-  const userMotivation = await UserMotivationModel.findOne({where: {uuid: req.params.uuid, year: req.params.year}})
-  if (userMotivation) {
-    const filePath = __dirname + '/../../uploads/motivation/' + userMotivation.hash + '.pdf';
+	const isLT = req.kauth.grant.access_token.content.groups.includes(req.params.year + '_LT')
+	const self = req.kauth.grant.access_token.content.sub === req.params.uuid
+  if (!self && !isLT) {
+		res.status(403).send()
+		return;
+	}
+  const userYear = await userYearModel.findOne({where: {uuid: req.params.uuid, year: req.params.year}})
+  if (userYear) {
+    const filePath = __dirname + '/../../uploads/motivation/' + userYear.motivationHash + '.pdf';
     if (fs.existsSync(filePath)) {
       res.sendFile(path.resolve(filePath))
     } else {
@@ -27,15 +32,11 @@ export async function findOne(req, res) {
 
 export async function createOrUpdate(req, res) {
   const { file } = req.files;
-  const executingUser = req.kauth.grant.access_token.content.sub
-  const isAdmin = req.kauth.grant.access_token.content.groups.includes('admin')
-
-  if (req.params.uuid !== executingUser && !isAdmin) {
-    return res.status(403).send({
-      message: "Forbidden!"
-    });
+  const self = req.kauth.grant.access_token.content.sub === req.params.uuid
+  if ('!self') {
+		res.status(403).send()
+		return;
   }
-
   
   if (!file) {
     return res.sendStatus(400)
@@ -47,42 +48,29 @@ export async function createOrUpdate(req, res) {
   }
 
   file.mv(__dirname + '/../../uploads/motivation/' + file.md5 + '.pdf');
-
-  const userMotivation = await UserMotivationModel.findOne({where: {uuid: req.params.uuid, year: req.params.year}})
-  const year = await SettingModel.findByPk('currentYear')
-  const userYear = await UserYearModel.findOne({
+  
+	const year = req.params.year || (await settingModel.findByPk('currentYear')).value
+  const userYear = await userYearModel.findOne({
     where: {
       uuid: req.params.uuid,
-      year: year.value
+      year: year
     }
   })
-
-	if (userMotivation) {
-		UserMotivationModel.update({hash: file.md5}, {where: {uuid: req.params.uuid, year: req.params.year}});
+  let data = {
+    motivationHash: file.md5
+  }
+	if (userYear) {
     if (userYear.status == 1) {
-      UserYearModel.update({status: 2, editedBy: req.kauth.grant.access_token.content.sub}, {
-        where: {
-          uuid: req.params.uuid,
-          year: year.value
-        }
-      })
+      data['status'] = 2;
     }
-		res.status(200).send(userMotivation)
+    userYearModel.update(data, {
+      where: {
+        uuid: req.params.uuid,
+        year: year
+      }
+    })
+		res.status(200).send()
 	} else {
-		var data = {
-      uuid: req.params.uuid,
-      year: req.params.year,
-      hash: file.md5
-    }
-		UserMotivationModel.create(data)
-    if (userYear.status == 1) {
-      UserYearModel.update({status: 2, editedBy: req.kauth.grant.access_token.content.sub}, {
-        where: {
-          uuid: req.params.uuid,
-          year: year.value
-        }
-      })
-    }
-		res.status(200).send(userMotivation)
+		res.status(404).send()
 	}
 };

@@ -1,5 +1,5 @@
 import kcAdminClient from "../config/keycloak-cli.js";
-import UserModel from '../models/user.model.js'
+import userModel from '../models/user.model.js'
 
 export async function registration(req, res) {
 	if (!req.body || !req.body.mail || !req.body.firstName || !req.body.lastName) {
@@ -34,7 +34,7 @@ export async function registration(req, res) {
 			username: username,
 			password: password
 		})
-		let user = UserModel.create({
+		let user = userModel.create({
 			uuid: uuid,
 			firstName: req.body.firstName,
 			lastName: req.body.lastName,
