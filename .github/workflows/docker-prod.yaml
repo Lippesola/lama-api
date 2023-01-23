@@ -1,0 +1,26 @@
+name: Build Docker Production
+
+on:
+  release:
+    types: [published]
+
+jobs:
+
+  build_and_publish_image:
+
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v3
+    
+    - name: Login to ghcr.io
+      run: echo $GITHUB_TOKEN | docker login ghcr.io -u lippesola --password-stdin
+      env:
+        GITHUB_TOKEN: ${{ github.token }}
+    - name: Build the Docker image
+      run: docker build . --file Dockerfile --tag ghcr.io/lippesola/lama-api:latest --tag ghcr.io/lippesola/lama-api:$(git tag --sort=committerdate | tail -1)
+    # Push
+    - name: Push the Docker image latest
+      run: docker push ghcr.io/lippesola/lama-api:latest
+    - name: Push the Docker image release
+      run: docker push ghcr.io/lippesola/lama-api:$(git tag --sort=committerdate | tail -1)
