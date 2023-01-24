@@ -58,7 +58,7 @@ export async function findOne(req, res) {
 	const isLT = req.kauth.grant.access_token.content.groups.includes(year + '_LT')
 	const self = req.kauth.grant.access_token.content.sub === req.params.uuid
 	let attributes = []
-	if (!isTeam) {
+	if (!isTeam && !self) {
 		res.status(403).send()
 		return
 	}
