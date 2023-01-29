@@ -101,7 +101,7 @@ export async function createOrUpdate(req, res) {
 				let returnErrors = []
 				e.errors.forEach((error) => {
 					returnErrors.push(error.path)
-					console.log(error);
+					console.log(error.path, error.validatorKey);
 				})
 				res.status(400).send(returnErrors)
 			}
