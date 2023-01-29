@@ -88,14 +88,24 @@ export async function createOrUpdate(req, res) {
 		return;
 	}
 	const self = req.kauth.grant.access_token.content.sub === req.params.uuid
-	if (!self) {
+	const year = (await settingModel.findByPk('currentYear')).value
+	const isLT = req.kauth.grant.access_token.content.groups.includes(year + '_LT')
+	if (!self && !isLT) {
 		res.status(403).send()
 		return;
 	}
 	const user = await userModel.findByPk(req.params.uuid)
 	if (user) {
 		try {
-			await userModel.update(req.body, {where: {uuid: req.params.uuid}});
+			let data = {}
+			Object.entries(req.body).forEach(([key, value]) => {
+				if (value === null) {
+					data[key] = ''
+				} else {
+					data[key] = value
+				}
+			})
+			await userModel.update(data, {where: {uuid: req.params.uuid}});
 		} catch(e) {
 			if (e instanceof ValidationError) {
 				let returnErrors = []
