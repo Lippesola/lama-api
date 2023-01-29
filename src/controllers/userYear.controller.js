@@ -34,6 +34,8 @@ export async function findOne(req, res) {
 	}
 	const userYear = await userYearModel.findOne({where: {uuid: req.params.uuid, year: req.params.year}})
 	if (userYear) {
+		if (!userYear.build) userYear.build = 0;
+		if (!userYear.cleanup) userYear.cleanup = 0;
 		res.status(200).send(userYear)
 	} else {
 		res.status(404).send('not found')
