@@ -19,7 +19,9 @@
     "express-fileupload": "^1.4.0",
     "express-session": "^1.17.3",
     "keycloak-connect": "^20.0.3",
+    "mailgun.js": "^8.0.6",
     "mariadb": "^3.0.2",
+    "nodemailer": "^6.9.1",
     "sequelize": "^6.28.0"
   }
 }
