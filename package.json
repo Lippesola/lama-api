@@ -1,6 +1,6 @@
 {
   "name": "lama-api",
-  "version": "1.0.4",
+  "version": "1.0.5",
   "description": "Lippesola Administration und Mitarbeiter Anmeldung API",
   "main": "index.js",
   "type": "module",
