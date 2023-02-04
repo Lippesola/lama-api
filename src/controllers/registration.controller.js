@@ -7,7 +7,10 @@ export async function registration(req, res) {
 		return;
 	}
 
-	let username = req.body.firstName.toLowerCase() + '.' + req.body.lastName.toLowerCase()
+	const firstName = req.body.firstName.trim();
+	const lastName = req.body.lastName.trim();
+
+	let username = firstName.toLowerCase() + '.' + lastName.toLowerCase()
 	username = username.replaceAll('ä', 'ae')
 	username = username.replaceAll('ö', 'oe')
 	username = username.replaceAll('ü', 'ue')
@@ -18,11 +21,11 @@ export async function registration(req, res) {
 
 	kcAdminClient.users.create({
 		email: req.body.mail,
-		firstName: req.body.firstName,
-		lastName: req.body.lastName,
+		firstName: firstName,
+		lastName: lastName,
 		username: username,
 		enabled: true,
-		requiredActions: ['UPDATE_PASSWORD'],
+		requiredActions: ['VERIFY_EMAIL', 'UPDATE_PASSWORD'],
 		credentials: [{
 			value: password,
 			type: 'password'
@@ -36,8 +39,8 @@ export async function registration(req, res) {
 		})
 		let user = userModel.create({
 			uuid: uuid,
-			firstName: req.body.firstName,
-			lastName: req.body.lastName,
+			firstName: firstName,
+			lastName: lastName,
 			mail: req.body.mail
 		}).catch(function(e) {
 			console.log(e);
