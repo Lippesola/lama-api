@@ -44,17 +44,21 @@ app.use(keycloak.middleware())
 import avatarRouter from './src/routes/avatar.route.js'
 import eventRouter from './src/routes/event.route.js'
 import settingRouter from './src/routes/setting.route.js'
+import responsibilityRouter from './src/routes/responsibility.route.js'
 import miscRouter from './src/routes/misc.route.js'
 import userRouter from './src/routes/user.route.js'
 import userMotivation from './src/routes/userMotivation.route.js'
 import userTaskRouter from './src/routes/userTask.route.js'
 import userYearRouter from './src/routes/userYear.route.js'
+
 import userModel from './src/models/user.model.js';
 import userYearModel from './src/models/userYear.model.js';
+import responsibilityModel from './src/models/responsibility.model.js';
 
 app.use('/avatar', avatarRouter);
 app.use('/event', eventRouter);
 app.use('/setting', settingRouter);
+app.use('/responsibility', responsibilityRouter);
 app.use('/misc', miscRouter);
 app.use('/user', userRouter);
 app.use('/userMotivation', userMotivation);
@@ -72,3 +76,6 @@ await initSequelize()
 
 userModel.hasMany(userYearModel, {foreignKey: 'uuid'})
 userYearModel.hasOne(userModel, {foreignKey: 'uuid'})
+
+userModel.hasMany(responsibilityModel, {foreignKey: 'uuid'})
+responsibilityModel.hasOne(userModel, {foreignKey: 'uuid'})
