@@ -20,6 +20,6 @@
     "express-session": "^1.17.3",
     "keycloak-connect": "^20.0.3",
     "mariadb": "^3.0.2",
-    "sequelize": "^6.28.0"
+    "sequelize": "^6.28.2"
   }
 }
