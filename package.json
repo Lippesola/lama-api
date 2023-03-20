@@ -1,6 +1,6 @@
 {
   "name": "lama-api",
-  "version": "1.0.3",
+  "version": "1.0.5",
   "description": "Lippesola Administration und Mitarbeiter Anmeldung API",
   "main": "index.js",
   "type": "module",
@@ -11,18 +11,18 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "@keycloak/keycloak-admin-client": "^20.0.3",
-    "body-parser": "^1.20.1",
+    "@keycloak/keycloak-admin-client": "^21.0.1",
+    "body-parser": "^1.20.2",
     "cors": "^2.8.5",
     "dotenv": "^16.0.3",
     "express": "^4.18.2",
     "express-fileupload": "^1.4.0",
     "express-session": "^1.17.3",
     "html-to-text": "^9.0.4",
-    "keycloak-connect": "^20.0.3",
     "mailgun.js": "^8.0.6",
-    "mariadb": "^3.0.2",
     "nodemailer": "^6.9.1",
-    "sequelize": "^6.28.0"
+    "keycloak-connect": "^21.0.1",
+    "mariadb": "^3.1.1",
+    "sequelize": "^6.29.3"
   }
 }
