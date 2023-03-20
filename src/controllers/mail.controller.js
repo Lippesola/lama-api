@@ -1,9 +1,10 @@
+import mailModel from '../models/mail.model.js'
 import mail from '../config/mail.js'
 import userModel from '../models/user.model.js';
 import formData from 'form-data';
 import Mailgun from 'mailgun.js';
 import nodemailer from 'nodemailer';
-
+import { convert } from 'html-to-text';
 
 const mailgun = new Mailgun(formData);
 const mg = mailgun.client({
@@ -12,6 +13,44 @@ const mg = mailgun.client({
 	url: mail.mailgun.url
 })
 
+export async function findAll(req, res) {
+	try {
+		const setting = await mailModel.findAll({where: req.query})
+		res.status(200).send(setting)
+	} catch(e) {
+		res.status(400).send()
+	}
+}
+
+export async function findOne(req, res) {
+	if (!req.params || !req.params.key) {
+		res.status(400).send('bad request')
+		return;
+	}
+	const setting = await mailModel.findByPk(req.params.key)
+	if (setting) {
+		res.status(200).send(setting)
+	} else {
+		res.status(404).send('not found')
+	}
+}
+
+export async function createOrUpdate(req, res) {
+	if (!req.params || !req.params.key) {
+		res.status(400).send('bad request')
+		return;
+	}
+	const setting = await mailModel.findByPk(req.params.key)
+	if (setting) {
+		mailModel.update(req.body, {where: {key: req.params.key}});
+		res.status(200).send(setting)
+	} else {
+		var data = req.body
+		data.key = req.params.key
+		mailModel.create(data)
+		res.status(200).send(setting)
+	}
+}
 
 export function listDomains() {
 	mg.domains.list()
@@ -43,7 +82,9 @@ export async function addToTeamMailinglist(uuids, year) {
 	addToMailinglist('team' + year + '@' + (process.env.MAIL_LIST_DOMAIN || 'verteiler.lippesola.de'), uuids);
 }
 
-export async function sendMail(to, subject, text) {
+export async function sendMail(uuid, type) {
+	const user = await userModel.findByPk(uuid);
+	const mailConfiguration = await mailModel.findByPk(type);
 	let transporter = nodemailer.createTransport({
 		host: mail.mailer.host,
 		port: mail.mailer.port,
@@ -54,25 +95,19 @@ export async function sendMail(to, subject, text) {
 		}
 	});
 
+	let html = mailConfiguration.text;
+	html = html.replace('{{firstName}}', user.firstName);
+	html = html.replace('{{lastName}}', user.lastName);
+	let text = convert(html);
+
 	let info = await transporter.sendMail({
 		from: '"LAMA" <' + mail.mailer.from + '>',
-		to: to,
+		to: user.mail,
 		bcc: mail.mailer.bcc,
-		subject: subject,
-		text: text
+		subject: mailConfiguration.subject,
+		text: text,
+		html: html
 	});
 
 	console.log(info);
-}
-
-export async function sendConfirmationMail(uuid) {
-	const user = await userModel.findByPk(uuid);
-	const subject = 'Du wurdest als Mitarbeiter freigeschaltet!'
-	const text = "Hey " + user.firstName + "\n" + 
-	"du wurdest gerade für den Mitarbeiter-Bereich freigeschaltet.\n" + 
-	"Wenn du willst, kannst du dich direkt unter " + (process.env.LAMA_APP_URL || 'lama.lippesola.de') + " anmelden.\n" +
-	"Dort kannst du unter Anderem auch dein Profilbild ändern, damit andere MA dich schneller kennenlernen können.\n\n" + 
-	"Danke, dass du dabei bist!\n" + 
-	"Dein VB MA"
-	sendMail(user.mail, subject, text);
 }
