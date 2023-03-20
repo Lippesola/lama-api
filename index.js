@@ -45,6 +45,7 @@ import avatarRouter from './src/routes/avatar.route.js'
 import eventRouter from './src/routes/event.route.js'
 import settingRouter from './src/routes/setting.route.js'
 import responsibilityRouter from './src/routes/responsibility.route.js'
+import mailRouter from './src/routes/mail.route.js'
 import miscRouter from './src/routes/misc.route.js'
 import userRouter from './src/routes/user.route.js'
 import userMotivation from './src/routes/userMotivation.route.js'
@@ -59,6 +60,7 @@ app.use('/avatar', avatarRouter);
 app.use('/event', eventRouter);
 app.use('/setting', settingRouter);
 app.use('/responsibility', responsibilityRouter);
+app.use('/mail', mailRouter);
 app.use('/misc', miscRouter);
 app.use('/user', userRouter);
 app.use('/userMotivation', userMotivation);
