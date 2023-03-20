@@ -3,6 +3,7 @@ import userYearModel from '../models/userYear.model.js'
 import keycloak from '../config/keycloak.js';
 import settingModel from "../models/setting.model.js";
 import userModel from "../models/user.model.js";
+import { addToTeamMailinglist, sendMail } from "./mail.controller.js";
 
 export async function findAll(req, res) {
 	const year = req.query.year || await settingModel.findByPk('currentYear')
@@ -80,6 +81,11 @@ export async function createOrUpdate(req, res) {
 				id: req.params.uuid,
 				groupId: groupId
 			})
+			.then(() => {})
+			.catch((e) => {console.log(e);})
+			
+			addToTeamMailinglist(req.params.uuid, year);
+			sendMail(req.params.uuid, 'confirmation');
 		}
 		userYearModel.update(data, {where: {uuid: req.params.uuid, year: req.params.year}});
 		res.status(200).send(userYear)
