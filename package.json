@@ -23,6 +23,6 @@
     "nodemailer": "^6.9.1",
     "keycloak-connect": "^21.0.1",
     "mariadb": "^3.1.1",
-    "sequelize": "^6.29.3"
+    "sequelize": "^6.31.0"
   }
 }
