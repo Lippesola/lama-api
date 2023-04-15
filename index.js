@@ -34,8 +34,15 @@ app.use(express.urlencoded({ extended: true }));
 
 // unprotected routes
 import { registration } from './src/controllers/registration.controller.js';
+import { findAll as getAllEvents } from './src/controllers/event.controller.js';
+import { findAll as getAllSettings } from './src/controllers/setting.controller.js';
+import { create as createSupporterYear } from './src/controllers/supporterYear.controller.js';
+
 app.get("/", (req, res) => {res.json({ message: "up" });});
 app.post('/registration', registration)
+app.get('/event', getAllEvents);
+app.get('/setting', getAllSettings);
+app.post('/supporterYear', createSupporterYear)
 
 // protected routes
 import keycloak from './src/config/keycloak.js'
@@ -55,6 +62,9 @@ import userYearRouter from './src/routes/userYear.route.js'
 import userModel from './src/models/user.model.js';
 import userYearModel from './src/models/userYear.model.js';
 import responsibilityModel from './src/models/responsibility.model.js';
+
+import supporterYearModel from './src/models/supporterYear.model.js';
+import supporterDayModel from './src/models/supporterDay.model.js';
 
 app.use('/avatar', avatarRouter);
 app.use('/event', eventRouter);
@@ -81,3 +91,6 @@ userYearModel.hasOne(userModel, {foreignKey: 'uuid'})
 
 userModel.hasMany(responsibilityModel, {foreignKey: 'uuid'})
 responsibilityModel.hasOne(userModel, {foreignKey: 'uuid'})
+
+supporterYearModel.hasMany(supporterDayModel, {foreignKey: 'uuid'})
+supporterDayModel.hasOne(supporterYearModel, {foreignKey: 'uuid'})

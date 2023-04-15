@@ -4,7 +4,6 @@ import { findAll, findOne, createOrUpdate } from '../controllers/setting.control
 
 var router = new Router();
   
-	router.get('/', keycloak.protect(), findAll);
 	router.get('/:key', keycloak.protect(), findOne);
 	router.post('/:key', keycloak.protect(['admin']), createOrUpdate);
 
