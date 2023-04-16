@@ -19,7 +19,7 @@
     "express-fileupload": "^1.4.0",
     "express-session": "^1.17.3",
     "html-to-text": "^9.0.5",
-    "mailgun.js": "^8.0.6",
+    "mailgun.js": "^8.2.1",
     "nodemailer": "^6.9.1",
     "keycloak-connect": "^21.0.2",
     "mariadb": "^3.1.1",
