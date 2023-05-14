@@ -3,6 +3,7 @@ import userYearModel from '../models/userYear.model.js'
 import keycloak from '../config/keycloak.js';
 import settingModel from "../models/setting.model.js";
 import userModel from "../models/user.model.js";
+import userDocumentModel from "../models/userDocument.model.js";
 import { addToTeamMailinglist, sendMail } from "./mail.controller.js";
 
 export async function findAll(req, res) {
@@ -13,17 +14,27 @@ export async function findAll(req, res) {
 		return;
 	}
 	let data = {}
+	data['include'] = []
 	if (typeof req.query.userBundle !== 'undefined') {
-		data['include'] = {
+		data['include'].push({
 			model: userModel
-		}
+		})
+	}
+	if (typeof req.query.documentBundle !== 'undefined') {
+		userYearModel.belongsTo(userDocumentModel, {foreignKey: 'uuid', targetKey: 'uuid'})
+		data['include'].push({
+			model: userDocumentModel
+		})
 	}
 	delete req.query.userBundle
+	delete req.query.documentBundle
 	data['where'] = req.query
 	try {
+		console.log(data);
 		const userYear = await userYearModel.findAll(data)
 		res.status(200).send(userYear)
 	} catch(e) {
+		console.log(e);
 		res.status(400).send()
 	}
 }

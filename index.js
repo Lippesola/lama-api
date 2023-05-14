@@ -55,8 +55,9 @@ import responsibilityRouter from './src/routes/responsibility.route.js'
 import mailRouter from './src/routes/mail.route.js'
 import miscRouter from './src/routes/misc.route.js'
 import userRouter from './src/routes/user.route.js'
+import userCriminalRecordRouter from './src/routes/userCriminalRecord.route.js'
 import userMotivation from './src/routes/userMotivation.route.js'
-import userTaskRouter from './src/routes/userTask.route.js'
+import userDocumentRouter from './src/routes/userDocument.route.js'
 import userYearRouter from './src/routes/userYear.route.js'
 
 import userModel from './src/models/user.model.js';
@@ -65,6 +66,7 @@ import responsibilityModel from './src/models/responsibility.model.js';
 
 import supporterYearModel from './src/models/supporterYear.model.js';
 import supporterDayModel from './src/models/supporterDay.model.js';
+import userDocumentModel from './src/models/userDocument.model.js';
 
 app.use('/avatar', avatarRouter);
 app.use('/event', eventRouter);
@@ -73,8 +75,9 @@ app.use('/responsibility', responsibilityRouter);
 app.use('/mail', mailRouter);
 app.use('/misc', miscRouter);
 app.use('/user', userRouter);
+app.use('/userCriminalRecord', userCriminalRecordRouter);
 app.use('/userMotivation', userMotivation);
-app.use('/userTask', userTaskRouter);
+app.use('/userDocument', userDocumentRouter);
 app.use('/userYear', userYearRouter);
 
 // set port, listen for requests
@@ -94,3 +97,6 @@ responsibilityModel.hasOne(userModel, {foreignKey: 'uuid'})
 
 supporterYearModel.hasMany(supporterDayModel, {foreignKey: 'uuid'})
 supporterDayModel.hasOne(supporterYearModel, {foreignKey: 'uuid'})
+
+userModel.hasOne(userDocumentModel, {foreignKey: 'uuid'})
+userDocumentModel.hasOne(userModel, {foreignKey: 'uuid'})
