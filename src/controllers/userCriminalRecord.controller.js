@@ -22,7 +22,7 @@ export async function findOne (req, res) {
   }
   
   // erstelle ein neues Dokument
-  const doc = new PDFDocument();
+  const doc = new PDFDocument({size: 'A4'});
   const __dirname = path.dirname(fileURLToPath(import.meta.url));
   let buffers = [];
 
