@@ -11,9 +11,9 @@ export default sequelize.define('UserDocument', {
     }
   },
   criminalRecord: {
-    type: DataTypes.DATE
+    type: DataTypes.INTEGER
   },
   selfCommitment: {
-    type: DataTypes.DATE
+    type: DataTypes.INTEGER
   }
 });
