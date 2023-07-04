@@ -166,6 +166,10 @@ export default sequelize.define('SupporterYear', {
   supportTypeOther: {
     type: DataTypes.BOOLEAN,
     validate: {}
+  },
+  supportOther: {
+    type: DataTypes.TEXT,
+    validate: {}
   }
   
 });
