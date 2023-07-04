@@ -21,7 +21,7 @@ export async function findOne(req, res) {
 		res.status(400).send('bad request')
 		return;
 	}
-	const year = req.query.year || (await settingModel.findByPk('currentYear')).value
+	const year = (await settingModel.findByPk('currentYear')).value
 	const isLT = req.kauth.grant.access_token.content.groups.includes(year + '_LT')
 	const isSelf = req.kauth.grant.access_token.content.sub === req.params.uuid
 	if (!isLT && !isSelf) {
