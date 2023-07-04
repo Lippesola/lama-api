@@ -54,7 +54,6 @@ export async function createOrUpdate(req, res) {
 	} else {
 		var data = req.body
 		data.uuid = req.params.uuid
-		data.criminalRecord  = req.params.criminalRecord 
 		userDocumentModel.create(data)
 		res.status(200).send(userDocument)
 	}

@@ -7,7 +7,7 @@ import { ValidationError } from 'sequelize';
 import { addToTeamMailinglist, sendMail } from "./mail.controller.js";
 
 export async function findAll(req, res) {
-	const year = req.query.year || await settingModel.findByPk('currentYear')
+	const year = req.query.year || (await settingModel.findByPk('currentYear')).value
 	const isLT = req.kauth.grant.access_token.content.groups.includes(year + '_LT')
 	if (!isLT) {
 		res.status(403).send()
@@ -29,6 +29,12 @@ export async function findAll(req, res) {
 export async function findOne(req, res) {
 	if (!req.params || !req.params.uuid) {
 		res.status(400).send('bad request')
+		return;
+	}
+	const year = (await settingModel.findByPk('currentYear')).value
+	const isLT = req.kauth.grant.access_token.content.groups.includes(year + '_LT')
+	if (!isLT) {
+		res.status(403).send()
 		return;
 	}
 	const supporterYear = await supporterYearModel.findOne({where: {uuid: req.params.uuid}})

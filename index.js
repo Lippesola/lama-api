@@ -54,6 +54,7 @@ import settingRouter from './src/routes/setting.route.js'
 import responsibilityRouter from './src/routes/responsibility.route.js'
 import mailRouter from './src/routes/mail.route.js'
 import miscRouter from './src/routes/misc.route.js'
+import supporterYearRouter from './src/routes/supporterYear.route.js'
 import userRouter from './src/routes/user.route.js'
 import userCriminalRecordRouter from './src/routes/userCriminalRecord.route.js'
 import userMotivation from './src/routes/userMotivation.route.js'
@@ -75,6 +76,7 @@ app.use('/responsibility', responsibilityRouter);
 app.use('/mail', mailRouter);
 app.use('/misc', miscRouter);
 app.use('/user', userRouter);
+app.use('/supporterYear', supporterYearRouter);
 app.use('/userCriminalRecord', userCriminalRecordRouter);
 app.use('/userMotivation', userMotivation);
 app.use('/userDocument', userDocumentRouter);

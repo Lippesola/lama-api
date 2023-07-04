@@ -91,11 +91,31 @@ export default sequelize.define('SupporterYear', {
     type: DataTypes.BOOLEAN,
     validate: {}
   },
-  supportTypeTasks: {
+  supportTypeDriverCar: {
     type: DataTypes.BOOLEAN,
     validate: {}
   },
-  supportTypeDriver: {
+  supportTypeDriverTrailer: {
+    type: DataTypes.BOOLEAN,
+    validate: {}
+  },
+  supportTypeDriverTruck: {
+    type: DataTypes.BOOLEAN,
+    validate: {}
+  },
+  supportTypeVehicleTrailer: {
+    type: DataTypes.BOOLEAN,
+    validate: {}
+  },
+  supportTypeVehicleCar: {
+    type: DataTypes.BOOLEAN,
+    validate: {}
+  },
+  supportTypeVehicleVan: {
+    type: DataTypes.BOOLEAN,
+    validate: {}
+  },
+  supportTypeTasks: {
     type: DataTypes.BOOLEAN,
     validate: {}
   },
@@ -119,12 +139,36 @@ export default sequelize.define('SupporterYear', {
     type: DataTypes.BOOLEAN,
     validate: {}
   },
+  supportTypeInfrastructure: {
+    type: DataTypes.BOOLEAN,
+    validate: {}
+  },
+  supportTypeKitchen: {
+    type: DataTypes.BOOLEAN,
+    validate: {}
+  },
+  supportTypeMedia: {
+    type: DataTypes.BOOLEAN,
+    validate: {}
+  },
+  supportTypePrayer: {
+    type: DataTypes.BOOLEAN,
+    validate: {}
+  },
   supportTypeGames: {
+    type: DataTypes.BOOLEAN,
+    validate: {}
+  },
+  supportTypeNightwatch: {
     type: DataTypes.BOOLEAN,
     validate: {}
   },
   supportTypeOther: {
     type: DataTypes.BOOLEAN,
+    validate: {}
+  },
+  supportOther: {
+    type: DataTypes.TEXT,
     validate: {}
   }
   

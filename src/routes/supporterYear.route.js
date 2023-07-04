@@ -1,6 +1,6 @@
 import { Router } from 'express';
 import keycloak from '../config/keycloak.js';
-import { findAll, findOne, createOrUpdate } from '../controllers/supporterYear.controller.js'
+import { findAll, findOne, update } from '../controllers/supporterYear.controller.js'
 
 var router = new Router();
   
