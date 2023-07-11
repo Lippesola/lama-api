@@ -4,6 +4,7 @@ import userModel from '../models/user.model.js';
 import formData from 'form-data';
 import Mailgun from 'mailgun.js';
 import nodemailer from 'nodemailer';
+import settingModel from "../models/setting.model.js";
 import { convert } from 'html-to-text';
 
 const mailgun = new Mailgun(formData);
@@ -58,6 +59,55 @@ export function listDomains() {
 	.catch(err => console.error(err));
 }
 
+export async function findAllMailinglists(req, res) {
+	const lists = (await mg.lists.list()).items
+	const year = (await settingModel.findByPk('currentYear')).value
+	const isLT = req.kauth.grant.access_token.content.groups.includes(year + '_LT')
+	if (isLT) {
+		res.status(200).send(lists)
+		return;
+	}
+	res.status(200).send(lists.filter(list => list.address.toLowerCase().startsWith('team' + year + '@')))
+}
+
+export async function sendMail(req, res) {
+	if (!req.body || !req.body.addresses.length || !req.body.subject || req.body.content === '<br>') {
+		let missingKeys = []
+		if (!req.body.addresses.length) missingKeys.push('addresses')
+		if (!req.body.subject) missingKeys.push('subject')
+		if (req.body.content == '<br>') missingKeys.push('content')
+		res.status(400).send(missingKeys)
+		return;
+	}
+	const year = (await settingModel.findByPk('currentYear')).value
+	const isLT = req.kauth.grant.access_token.content.groups.includes(year + '_LT')
+	const addresses = req.body.addresses
+	if (!isLT) {
+		if (addresses.length > 1 || !addresses[0].toLowerCase().startsWith('team' + year + '@')) {
+			res.status(403).send('forbidden to send to this address')
+			return;
+		}
+	}
+	const user = await userModel.findByPk(req.kauth.grant.access_token.content.sub)
+	const messageData = {
+		from: user.firstName + ' ' + user.lastName + ' <' + user.mail + '>',
+		to: addresses.toString(),
+		bcc: user.mail,
+		subject: req.body.subject,
+		html: req.body.content,
+		text: convert(req.body.content),
+		'h:Reply-To': user.mail
+	  };
+	  
+	mg.messages.create('verteiler.lippesola.de', messageData)
+	.then((mgRes) => {
+		res.status(200).send('mail sent');
+		return;
+	})
+	.catch((err) => {
+		console.error(err);
+	});}
+
 export async function addToMailinglist(mailingList, uuids) {
 	if (!Array.isArray(uuids)) {
 		uuids = [uuids];
@@ -82,7 +132,7 @@ export async function addToTeamMailinglist(uuids, year) {
 	addToMailinglist('team' + year + '@' + (process.env.MAIL_LIST_DOMAIN || 'verteiler.lippesola.de'), uuids);
 }
 
-export async function sendMail(uuid, type) {
+export async function sendMailToUser(uuid, type) {
 	const user = await userModel.findByPk(uuid);
 	const mailConfiguration = await mailModel.findByPk(type);
 	let transporter = nodemailer.createTransport({

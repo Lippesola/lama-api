@@ -53,6 +53,7 @@ import eventRouter from './src/routes/event.route.js'
 import settingRouter from './src/routes/setting.route.js'
 import responsibilityRouter from './src/routes/responsibility.route.js'
 import mailRouter from './src/routes/mail.route.js'
+import mailinglistRouter from './src/routes/mailinglist.route.js'
 import miscRouter from './src/routes/misc.route.js'
 import supporterYearRouter from './src/routes/supporterYear.route.js'
 import userRouter from './src/routes/user.route.js'
@@ -74,6 +75,7 @@ app.use('/event', eventRouter);
 app.use('/setting', settingRouter);
 app.use('/responsibility', responsibilityRouter);
 app.use('/mail', mailRouter);
+app.use('/mailinglist', mailinglistRouter);
 app.use('/misc', miscRouter);
 app.use('/user', userRouter);
 app.use('/supporterYear', supporterYearRouter);
