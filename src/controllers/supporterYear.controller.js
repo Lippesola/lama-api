@@ -4,7 +4,6 @@ import keycloak from '../config/keycloak.js';
 import settingModel from "../models/setting.model.js";
 import supporterDayModel from "../models/supporterDay.model.js";
 import { ValidationError } from 'sequelize';
-import { addToTeamMailinglist, sendMail } from "./mail.controller.js";
 
 export async function findAll(req, res) {
 	const year = req.query.year || (await settingModel.findByPk('currentYear')).value
