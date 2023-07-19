@@ -60,6 +60,7 @@ import userRouter from './src/routes/user.route.js'
 import userCriminalRecordRouter from './src/routes/userCriminalRecord.route.js'
 import userMotivation from './src/routes/userMotivation.route.js'
 import userDocumentRouter from './src/routes/userDocument.route.js'
+import userPermissionRouter from './src/routes/userPermission.route.js'
 import userYearRouter from './src/routes/userYear.route.js'
 
 import userModel from './src/models/user.model.js';
@@ -69,6 +70,7 @@ import responsibilityModel from './src/models/responsibility.model.js';
 import supporterYearModel from './src/models/supporterYear.model.js';
 import supporterDayModel from './src/models/supporterDay.model.js';
 import userDocumentModel from './src/models/userDocument.model.js';
+import userPermissionModel from './src/models/userPermission.model.js';
 
 app.use('/avatar', avatarRouter);
 app.use('/event', eventRouter);
@@ -82,6 +84,7 @@ app.use('/supporterYear', supporterYearRouter);
 app.use('/userCriminalRecord', userCriminalRecordRouter);
 app.use('/userMotivation', userMotivation);
 app.use('/userDocument', userDocumentRouter);
+app.use('/userPermission', userPermissionRouter);
 app.use('/userYear', userYearRouter);
 
 // set port, listen for requests
@@ -104,3 +107,6 @@ supporterDayModel.hasOne(supporterYearModel, {foreignKey: 'uuid'})
 
 userModel.hasOne(userDocumentModel, {foreignKey: 'uuid'})
 userDocumentModel.hasOne(userModel, {foreignKey: 'uuid'})
+
+userModel.hasMany(userPermissionModel, {foreignKey: 'uuid'})
+userPermissionModel.hasOne(userModel, {foreignKey: 'uuid'})

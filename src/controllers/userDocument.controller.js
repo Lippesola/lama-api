@@ -1,10 +1,13 @@
 import userDocumentModel from '../models/userDocument.model.js'
 import settingModel from '../models/setting.model.js'
+import userPermissionModel from '../models/userPermission.model.js'
 
 export async function findAll(req, res) {
+	const executingUser = req.kauth.grant.access_token.content.sub
 	const year = req.query.year || await settingModel.findByPk('currentYear')
 	const isLT = req.kauth.grant.access_token.content.groups.includes(year + '_LT')
-	if (!isLT) {
+	const allowed = isLT || (await userPermissionModel.findOne({where: { uuid: executingUser, permission: 'userDocument'}})).allowed
+	if (!allowed) {
 		res.status(403).send()
 		return;
 	}
@@ -21,10 +24,12 @@ export async function findOne(req, res) {
 		res.status(400).send('bad request')
 		return;
 	}
+	const executingUser = req.kauth.grant.access_token.content.sub
+	const isSelf = executingUser === req.params.uuid
 	const year = (await settingModel.findByPk('currentYear')).value
 	const isLT = req.kauth.grant.access_token.content.groups.includes(year + '_LT')
-	const isSelf = req.kauth.grant.access_token.content.sub === req.params.uuid
-	if (!isLT && !isSelf) {
+	const allowed = isLT || isSelf || (await userPermissionModel.findOne({where: { uuid: executingUser, permission: 'userDocument'}})).allowed
+	if (!allowed) {
 		res.status(403).send()
 		return;
 	}
@@ -37,9 +42,11 @@ export async function findOne(req, res) {
 }
 
 export async function createOrUpdate(req, res) {
+	const executingUser = req.kauth.grant.access_token.content.sub
 	const year = (await settingModel.findByPk('currentYear')).value
 	const isLT = req.kauth.grant.access_token.content.groups.includes(year + '_LT')
-	if (!isLT) {
+	const allowed = isLT || (await userPermissionModel.findOne({where: { uuid: executingUser, permission: 'userDocument'}})).allowed
+	if (!allowed) {
 		res.status(403).send()
 		return;
 	}

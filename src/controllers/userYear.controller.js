@@ -4,12 +4,14 @@ import keycloak from '../config/keycloak.js';
 import settingModel from "../models/setting.model.js";
 import userModel from "../models/user.model.js";
 import userDocumentModel from "../models/userDocument.model.js";
+import userPermissionModel from "../models/userPermission.model.js";
 import { addToTeamMailinglist, sendMailToUser } from "./mail.controller.js";
 
 export async function findAll(req, res) {
-	const year = req.query.year || await settingModel.findByPk('currentYear')
+	const year = req.query.year || (await settingModel.findByPk('currentYear')).value
 	const isLT = req.kauth.grant.access_token.content.groups.includes(year + '_LT')
-	if (!isLT) {
+	const permissions = await userPermissionModel.findAll({where: {uuid: req.kauth.grant.access_token.content.sub}})
+	if (!isLT && req.query.status !== '4') {
 		res.status(403).send()
 		return;
 	}
@@ -19,12 +21,25 @@ export async function findAll(req, res) {
 		data['include'].push({
 			model: userModel
 		})
+		if (!isLT) {
+			let attributes = [];
+			for (const key in userModel.rawAttributes) {
+				if (userModel.rawAttributes[key]['public']) {
+					attributes.push(key)
+				}
+			};
+			if (attributes.length > 0) {
+				data['include'][0]['attributes'] = attributes
+			}
+		}
 	}
-	if (typeof req.query.documentBundle !== 'undefined') {
-		userYearModel.belongsTo(userDocumentModel, {foreignKey: 'uuid', targetKey: 'uuid'})
-		data['include'].push({
-			model: userDocumentModel
-		})
+	if (isLT || permissions.find(permission => permission.permission === 'userDocument')?.allowed) {
+		if (typeof req.query.documentBundle !== 'undefined') {
+			userYearModel.belongsTo(userDocumentModel, {foreignKey: 'uuid', targetKey: 'uuid'})
+			data['include'].push({
+				model: userDocumentModel
+			})
+		}
 	}
 	delete req.query.userBundle
 	delete req.query.documentBundle
