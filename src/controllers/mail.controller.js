@@ -6,6 +6,8 @@ import Mailgun from 'mailgun.js';
 import nodemailer from 'nodemailer';
 import settingModel from "../models/setting.model.js";
 import { convert } from 'html-to-text';
+import userPermissionModel from '../models/userPermission.model.js';
+import { Op } from 'sequelize';
 
 const mailgun = new Mailgun(formData);
 const mg = mailgun.client({
@@ -67,7 +69,21 @@ export async function findAllMailinglists(req, res) {
 		res.status(200).send(lists)
 		return;
 	}
-	res.status(200).send(lists.filter(list => list.address.toLowerCase().startsWith('team' + year + '@')))
+	var ret = lists.filter(list => list.address.toLowerCase().startsWith('team' + year + '@'))
+	const mailPermissions = await userPermissionModel.findAll({
+		where: {
+			uuid: req.kauth.grant.access_token.content.sub,
+			allowed: true,
+			permission: {
+				[Op.like]: 'mailinglist.%'
+			}
+		}
+	})
+	mailPermissions.forEach(permission => {
+		const list = lists.find(list => list.address.toLowerCase().startsWith(permission.permission.toLowerCase().split('.')[1]))
+		if (list) ret.push(list)
+	})
+	res.status(200).send(ret)
 }
 
 export async function sendMail(req, res) {
@@ -83,10 +99,25 @@ export async function sendMail(req, res) {
 	const isLT = req.kauth.grant.access_token.content.groups.includes(year + '_LT')
 	const addresses = req.body.addresses
 	if (!isLT) {
-		if (addresses.length > 1 || !addresses[0].toLowerCase().startsWith('team' + year + '@')) {
-			res.status(403).send('forbidden to send to this address')
-			return;
-		}
+		const mailPermissions = await userPermissionModel.findAll({
+			where: {
+				uuid: req.kauth.grant.access_token.content.sub,
+				allowed: true,
+				permission: {
+					[Op.like]: 'mailinglist.%'
+				}
+			}
+		})	
+		let allowed = true;
+		addresses.forEach(address => {
+			if (!address.toLowerCase().startsWith('team' + year + '@')) {
+				if (!mailPermissions.find(permission => permission.permission.toLowerCase().split('.')[1] === address.toLowerCase().split('@')[0])) {
+					res.status(403).send('forbidden to send to this addresses')
+					allowed = false;
+				}
+			}
+		})
+		if (!allowed) return;
 	}
 	const user = await userModel.findByPk(req.kauth.grant.access_token.content.sub)
 	const messageData = {
@@ -97,8 +128,7 @@ export async function sendMail(req, res) {
 		html: req.body.content,
 		text: convert(req.body.content),
 		'h:Reply-To': user.mail
-	  };
-	  
+	};
 	mg.messages.create('verteiler.lippesola.de', messageData)
 	.then((mgRes) => {
 		res.status(200).send('mail sent');
