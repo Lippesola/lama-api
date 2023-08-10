@@ -63,6 +63,10 @@ import userDocumentRouter from './src/routes/userDocument.route.js'
 import userPermissionRouter from './src/routes/userPermission.route.js'
 import userYearRouter from './src/routes/userYear.route.js'
 
+import threadRouter from './src/routes/thread.route.js'
+import postRouter from './src/routes/post.route.js'
+import userPostRouter from './src/routes/userPost.route.js'
+
 import userModel from './src/models/user.model.js';
 import userYearModel from './src/models/userYear.model.js';
 import responsibilityModel from './src/models/responsibility.model.js';
@@ -86,6 +90,10 @@ app.use('/userMotivation', userMotivation);
 app.use('/userDocument', userDocumentRouter);
 app.use('/userPermission', userPermissionRouter);
 app.use('/userYear', userYearRouter);
+
+app.use('/thread', threadRouter);
+app.use('/post', postRouter);
+app.use('/userPost', userPostRouter);
 
 // set port, listen for requests
 const PORT = process.env.PORT || 8080;
