@@ -24,6 +24,6 @@
     "keycloak-connect": "^22.0.1",
     "mariadb": "^3.2.0",
     "pdfkit": "^0.13.0",
-    "sequelize": "^6.32.1"
+    "sequelize": "^6.34.0"
   }
 }
