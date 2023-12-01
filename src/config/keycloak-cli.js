@@ -1,7 +1,7 @@
 import KcAdminClient from '@keycloak/keycloak-admin-client';
 const kcAdminClient = new KcAdminClient({
     baseUrl: process.env.KEYCLOAK_URL || 'https://account.lippesola.de/auth',
-    realmName: process.env.KEYCLOAK_REALM || 'Lippesola.de',
+    realmName: process.env.KEYCLOAK_REALM || 'solaid',
 });
 
 const credentials = {

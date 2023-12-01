@@ -6,7 +6,7 @@ let _keycloak;
 var keycloakConfig = {
     bearerOnly: true,
     serverUrl: process.env.KEYCLOAK_URL || 'https://account.lippesola.de/auth',
-    realm: process.env.KEYCLOAK_REALM || 'Lippesola.de'
+    realm: process.env.KEYCLOAK_REALM || 'solaid'
 };
 
 function getKeycloak() {
