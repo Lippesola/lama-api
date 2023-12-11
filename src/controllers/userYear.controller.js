@@ -95,9 +95,9 @@ export async function createOrUpdate(req, res) {
 			}
 			let groupId = '';
 			(await kcAdminClient.groups.find()).forEach((group) => {
-				if (group.name == 2023) {
+				if (group.name == year) {
 					group.subGroups.forEach((subGroup) => {
-						if (subGroup.name == (2023 + '_Team')) {
+						if (subGroup.name == (year + '_Team')) {
 							groupId = subGroup.id
 						}
 					})
