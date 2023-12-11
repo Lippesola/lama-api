@@ -11,12 +11,12 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "@keycloak/keycloak-admin-client": "^22.0.5",
+    "@keycloak/keycloak-admin-client": "^23.0.1",
     "body-parser": "^1.20.2",
     "cors": "^2.8.5",
     "dotenv": "^16.3.1",
     "express": "^4.18.2",
-    "express-fileupload": "^1.4.0",
+    "express-fileupload": "^1.4.3",
     "express-session": "^1.17.3",
     "html-to-text": "^9.0.5",
     "mailgun.js": "^9.3.0",
@@ -24,6 +24,6 @@
     "keycloak-connect": "^22.0.5",
     "mariadb": "^3.2.2",
     "pdfkit": "^0.13.0",
-    "sequelize": "^6.35.0"
+    "sequelize": "^6.35.1"
   }
 }

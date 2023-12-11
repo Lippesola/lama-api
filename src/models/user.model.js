@@ -121,8 +121,12 @@ export default sequelize.define('User', {
     },
     public: true
   },
-  nutrition: {
-    type: DataTypes.STRING,
-    public: false
-  }
+  vegetarian: {
+    type: DataTypes.BOOLEAN,
+    validate: {}
+  },
+  lactose: {
+    type: DataTypes.BOOLEAN,
+    validate: {}
+  },
 });

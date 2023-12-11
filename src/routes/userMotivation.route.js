@@ -4,7 +4,7 @@ import { findOne, createOrUpdate } from '../controllers/userMotivation.controlle
 
 var router = new Router();
 
-    router.get('/:uuid/:year', keycloak.protect(), findOne);
-    router.post('/:uuid/:year', keycloak.protect(), createOrUpdate);
+    router.get('/:uuid', keycloak.protect(), findOne);
+    router.post('/:uuid', keycloak.protect(), createOrUpdate);
 
 export default router

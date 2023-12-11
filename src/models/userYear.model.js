@@ -17,9 +17,6 @@ export default sequelize.define('UserYear', {
   status: {
     type: DataTypes.INTEGER
   },
-  motivationHash: {
-    type: DataTypes.STRING
-  },
   build: {
     type: DataTypes.TINYINT,
     validate: {
@@ -181,12 +178,22 @@ export default sequelize.define('UserYear', {
       max: 3
     }
   },
+  wishPrayer: {
+    type: DataTypes.TINYINT,
+    validate: {
+      min: 0,
+      max: 3
+    }
+  },
   wishOther: {
     type: DataTypes.TINYINT,
     validate: {
       min: 0,
       max: 3
     }
+  },
+  wishOtherText: {
+    type: DataTypes.TEXT
   },
   comment: {
     type: DataTypes.TEXT
