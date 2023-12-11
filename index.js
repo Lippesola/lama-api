@@ -50,6 +50,8 @@ app.use(keycloak.middleware())
 
 import avatarRouter from './src/routes/avatar.route.js'
 import eventRouter from './src/routes/event.route.js'
+import featureRouter from './src/routes/feature.route.js'
+import motivationRouter from './src/routes/motivation.route.js'
 import settingRouter from './src/routes/setting.route.js'
 import responsibilityRouter from './src/routes/responsibility.route.js'
 import mailRouter from './src/routes/mail.route.js'
@@ -58,7 +60,7 @@ import miscRouter from './src/routes/misc.route.js'
 import supporterYearRouter from './src/routes/supporterYear.route.js'
 import userRouter from './src/routes/user.route.js'
 import userCriminalRecordRouter from './src/routes/userCriminalRecord.route.js'
-import userMotivation from './src/routes/userMotivation.route.js'
+import userMotivationRouter from './src/routes/userMotivation.route.js'
 import userDocumentRouter from './src/routes/userDocument.route.js'
 import userPermissionRouter from './src/routes/userPermission.route.js'
 import userYearRouter from './src/routes/userYear.route.js'
@@ -75,9 +77,12 @@ import supporterYearModel from './src/models/supporterYear.model.js';
 import supporterDayModel from './src/models/supporterDay.model.js';
 import userDocumentModel from './src/models/userDocument.model.js';
 import userPermissionModel from './src/models/userPermission.model.js';
+import userMotivationModel from './src/models/userMotivation.model.js';
 
 app.use('/avatar', avatarRouter);
 app.use('/event', eventRouter);
+app.use('/feature', featureRouter);
+app.use('/motivation', motivationRouter);
 app.use('/setting', settingRouter);
 app.use('/responsibility', responsibilityRouter);
 app.use('/mail', mailRouter);
@@ -86,7 +91,7 @@ app.use('/misc', miscRouter);
 app.use('/user', userRouter);
 app.use('/supporterYear', supporterYearRouter);
 app.use('/userCriminalRecord', userCriminalRecordRouter);
-app.use('/userMotivation', userMotivation);
+app.use('/userMotivation', userMotivationRouter);
 app.use('/userDocument', userDocumentRouter);
 app.use('/userPermission', userPermissionRouter);
 app.use('/userYear', userYearRouter);
@@ -115,6 +120,9 @@ supporterDayModel.hasOne(supporterYearModel, {foreignKey: 'uuid'})
 
 userModel.hasOne(userDocumentModel, {foreignKey: 'uuid'})
 userDocumentModel.hasOne(userModel, {foreignKey: 'uuid'})
+
+userModel.hasOne(userMotivationModel, {foreignKey: 'uuid'})
+userMotivationModel.hasOne(userModel, {foreignKey: 'uuid'})
 
 userModel.hasMany(userPermissionModel, {foreignKey: 'uuid'})
 userPermissionModel.hasOne(userModel, {foreignKey: 'uuid'})
