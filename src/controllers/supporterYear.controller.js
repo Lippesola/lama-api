@@ -7,7 +7,7 @@ import { ValidationError } from 'sequelize';
 
 export async function findAll(req, res) {
 	const year = req.query.year || (await settingModel.findByPk('currentYear')).value
-	const isLT = req.kauth.grant.access_token.content.groups.includes(year + '_LT')
+	const isLT = req.kauth.grant.access_token.content.groups?.includes(year + '_LT')
 	if (!isLT) {
 		res.status(403).send()
 		return;
@@ -31,7 +31,7 @@ export async function findOne(req, res) {
 		return;
 	}
 	const year = (await settingModel.findByPk('currentYear')).value
-	const isLT = req.kauth.grant.access_token.content.groups.includes(year + '_LT')
+	const isLT = req.kauth.grant.access_token.content.groups?.includes(year + '_LT')
 	if (!isLT) {
 		res.status(403).send()
 		return;
@@ -74,7 +74,7 @@ export async function create(req, res) {
 
 export async function update(req, res) {
 	const year = (await settingModel.findByPk('currentYear')).value
-	const isLT = req.kauth.grant.access_token.content.groups.includes(year + '_LT')
+	const isLT = req.kauth.grant.access_token.content.groups?.includes(year + '_LT')
 
 	if (!isLT) {
 		res.status(403).send()

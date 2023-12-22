@@ -5,7 +5,7 @@ import userYearModel from "../models/userYear.model.js";
 import { addToTeamMailinglist } from "./mail.controller.js";
 
 export async function initUsers(req, res) {
-	const isAdmin = req.kauth.grant.access_token.content.groups.includes('admin')
+	const isAdmin = req.kauth.grant.access_token.content.groups?.includes('admin')
   
 	if (!isAdmin) {
 	  return res.status(403).send({
@@ -30,7 +30,7 @@ export async function initUsers(req, res) {
 }
 
 export async function fillTeamMailinglist(req, res) {
-	const isAdmin = req.kauth.grant.access_token.content.groups.includes('admin')
+	const isAdmin = req.kauth.grant.access_token.content.groups?.includes('admin')
 	if (!isAdmin) {
 	  return res.status(403).send({
 		message: "Forbidden!"

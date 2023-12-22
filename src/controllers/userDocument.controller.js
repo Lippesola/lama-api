@@ -5,7 +5,7 @@ import userPermissionModel from '../models/userPermission.model.js'
 export async function findAll(req, res) {
 	const executingUser = req.kauth.grant.access_token.content.sub
 	const year = req.query.year || await settingModel.findByPk('currentYear')
-	const isLT = req.kauth.grant.access_token.content.groups.includes(year + '_LT')
+	const isLT = req.kauth.grant.access_token.content.groups?.includes(year + '_LT')
 	const allowed = isLT || (await userPermissionModel.findOne({where: { uuid: executingUser, permission: 'userDocument'}})).allowed
 	if (!allowed) {
 		res.status(403).send()
@@ -27,7 +27,7 @@ export async function findOne(req, res) {
 	const executingUser = req.kauth.grant.access_token.content.sub
 	const isSelf = executingUser === req.params.uuid
 	const year = (await settingModel.findByPk('currentYear')).value
-	const isLT = req.kauth.grant.access_token.content.groups.includes(year + '_LT')
+	const isLT = req.kauth.grant.access_token.content.groups?.includes(year + '_LT')
 	const allowed = isLT || isSelf || (await userPermissionModel.findOne({where: { uuid: executingUser, permission: 'userDocument'}})).allowed
 	if (!allowed) {
 		res.status(403).send()
@@ -44,7 +44,7 @@ export async function findOne(req, res) {
 export async function createOrUpdate(req, res) {
 	const executingUser = req.kauth.grant.access_token.content.sub
 	const year = (await settingModel.findByPk('currentYear')).value
-	const isLT = req.kauth.grant.access_token.content.groups.includes(year + '_LT')
+	const isLT = req.kauth.grant.access_token.content.groups?.includes(year + '_LT')
 	const allowed = isLT || (await userPermissionModel.findOne({where: { uuid: executingUser, permission: 'userDocument'}})).allowed
 	if (!allowed) {
 		res.status(403).send()

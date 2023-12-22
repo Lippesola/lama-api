@@ -25,7 +25,7 @@ export async function findOne(req, res) {
 
 export async function createOrUpdate(req, res) {
 	const year = (await settingModel.findByPk('currentYear')).value
-	const isLT = req.kauth.grant.access_token.content.groups.includes(year + '_LT')
+	const isLT = req.kauth.grant.access_token.content.groups?.includes(year + '_LT')
 	if (!isLT) {
 		res.status(403).send()
 		return;

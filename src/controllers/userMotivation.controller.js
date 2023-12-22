@@ -3,7 +3,7 @@ import settingModel from '../models/setting.model.js'
 
 export async function findAll(req, res) {
 	const year = req.query.year || await settingModel.findByPk('currentYear')
-	const isLT = req.kauth.grant.access_token.content.groups.includes(year + '_LT')
+	const isLT = req.kauth.grant.access_token.content.groups?.includes(year + '_LT')
 	if (!isLT) {
 		res.status(403).send()
 		return;
@@ -24,7 +24,7 @@ export async function findOne(req, res) {
 	const executingUser = req.kauth.grant.access_token.content.sub
 	const isSelf = executingUser === req.params.uuid
 	const year = (await settingModel.findByPk('currentYear')).value
-	const isLT = req.kauth.grant.access_token.content.groups.includes(year + '_LT')
+	const isLT = req.kauth.grant.access_token.content.groups?.includes(year + '_LT')
 	const allowed = isLT || isSelf
 	if (!allowed) {
 		res.status(403).send()
@@ -42,7 +42,7 @@ export async function createOrUpdate(req, res) {
 	const executingUser = req.kauth.grant.access_token.content.sub
 	const isSelf = executingUser === req.params.uuid
 	const year = (await settingModel.findByPk('currentYear')).value
-	const isLT = req.kauth.grant.access_token.content.groups.includes(year + '_LT')
+	const isLT = req.kauth.grant.access_token.content.groups?.includes(year + '_LT')
 	const allowed = isLT || isSelf
 	if (!allowed) {
 		res.status(403).send()

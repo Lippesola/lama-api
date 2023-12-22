@@ -9,7 +9,7 @@ import { addToTeamMailinglist, sendMailToUser } from "./mail.controller.js";
 
 export async function findAll(req, res) {
 	const year = req.query.year || (await settingModel.findByPk('currentYear')).value
-	const isLT = req.kauth.grant.access_token.content.groups.includes(year + '_LT')
+	const isLT = req.kauth.grant.access_token.content.groups?.includes(year + '_LT')
 	const permissions = await userPermissionModel.findAll({where: {uuid: req.kauth.grant.access_token.content.sub}})
 	if (!isLT && req.query.status !== '4') {
 		res.status(403).send()
@@ -75,7 +75,7 @@ export async function createOrUpdate(req, res) {
 		return;
 	}
 	const year = req.params.year || (await SettingModel.findByPk('currentYear')).value
-	const isLT = req.kauth.grant.access_token.content.groups.includes(year + '_LT')
+	const isLT = req.kauth.grant.access_token.content.groups?.includes(year + '_LT')
 	const self = req.kauth.grant.access_token.content.sub === req.params.uuid
 	if (!isLT && !self) {
 		res.status(403).send()
