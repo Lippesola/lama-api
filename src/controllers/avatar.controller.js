@@ -20,7 +20,7 @@ export async function findOne (req, res) {
 export function createOrUpdate(req, res) { 
   const { image } = req.files;
   const executingUser = req.kauth.grant.access_token.content.sub
-  const isAdmin = req.kauth.grant.access_token.content.groups.includes('admin')
+  const isAdmin = req.kauth.grant.access_token.content.groups?.includes('admin')
 
   if (req.params.uuid !== executingUser && !isAdmin) {
     return res.status(403).send({

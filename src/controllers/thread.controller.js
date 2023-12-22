@@ -40,7 +40,7 @@ export async function update(req, res) {
 		return;
 	}
 	const year = (await settingModel.findByPk('currentYear')).value
-	const isLT = req.kauth.grant.access_token.content.groups.includes(year + '_LT')
+	const isLT = req.kauth.grant.access_token.content.groups?.includes(year + '_LT')
 	const thread = await threadModel.findByPk(req.params.id)
 	const posts = await postModel.findAll({where: {threadId: req.params.id}})
 	if (thread) {
@@ -61,7 +61,7 @@ export async function deleteOne(req, res) {
 		return;
 	}
 	const year = (await settingModel.findByPk('currentYear')).value
-	const isLT = req.kauth.grant.access_token.content.groups.includes(year + '_LT')
+	const isLT = req.kauth.grant.access_token.content.groups?.includes(year + '_LT')
 	const thread = await threadModel.findByPk(req.params.id)
 	if (thread) {
 		const posts = await postModel.findAll({where: {threadId: req.params.id}})

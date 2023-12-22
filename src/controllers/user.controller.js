@@ -6,8 +6,8 @@ import { ValidationError } from 'sequelize';
 
 export async function findAll(req, res) {
 	const year = req.query.year || (await settingModel.findByPk('currentYear')).value
-	const isTeam = req.kauth.grant.access_token.content.groups.includes(year + '_Team')
-	const isLT = req.kauth.grant.access_token.content.groups.includes(year + '_LT')
+	const isTeam = req.kauth.grant.access_token.content.groups?.includes(year + '_Team')
+	const isLT = req.kauth.grant.access_token.content.groups?.includes(year + '_LT')
 	let findAllConfig = {}
 	let userWhere = req.query
 	let userYearWhere = {}
@@ -54,8 +54,8 @@ export async function findOne(req, res) {
 		return;
 	}
 	const year = (await settingModel.findByPk('currentYear')).value
-	const isTeam = req.kauth.grant.access_token.content.groups.includes(year + '_Team')
-	const isLT = req.kauth.grant.access_token.content.groups.includes(year + '_LT')
+	const isTeam = req.kauth.grant.access_token.content.groups?.includes(year + '_Team')
+	const isLT = req.kauth.grant.access_token.content.groups?.includes(year + '_LT')
 	const self = req.kauth.grant.access_token.content.sub === req.params.uuid
 	let attributes = []
 	if (!isTeam && !self) {
@@ -89,7 +89,7 @@ export async function createOrUpdate(req, res) {
 	}
 	const self = req.kauth.grant.access_token.content.sub === req.params.uuid
 	const year = (await settingModel.findByPk('currentYear')).value
-	const isLT = req.kauth.grant.access_token.content.groups.includes(year + '_LT')
+	const isLT = req.kauth.grant.access_token.content.groups?.includes(year + '_LT')
 	if (!self && !isLT) {
 		res.status(403).send()
 		return;

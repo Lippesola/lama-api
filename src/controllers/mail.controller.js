@@ -64,7 +64,7 @@ export function listDomains() {
 export async function findAllMailinglists(req, res) {
 	const lists = (await mg.lists.list()).items
 	const year = (await settingModel.findByPk('currentYear')).value
-	const isLT = req.kauth.grant.access_token.content.groups.includes(year + '_LT')
+	const isLT = req.kauth.grant.access_token.content.groups?.includes(year + '_LT')
 	if (isLT) {
 		res.status(200).send(lists)
 		return;
@@ -96,7 +96,7 @@ export async function sendMail(req, res) {
 		return;
 	}
 	const year = (await settingModel.findByPk('currentYear')).value
-	const isLT = req.kauth.grant.access_token.content.groups.includes(year + '_LT')
+	const isLT = req.kauth.grant.access_token.content.groups?.includes(year + '_LT')
 	const addresses = req.body.addresses
 	if (!isLT) {
 		const mailPermissions = await userPermissionModel.findAll({
