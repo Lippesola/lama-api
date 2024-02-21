@@ -7,7 +7,10 @@ import nodemailer from 'nodemailer';
 import settingModel from "../models/setting.model.js";
 import { convert } from 'html-to-text';
 import userPermissionModel from '../models/userPermission.model.js';
+import { findOne as findOneParticipator } from './participator.controller.js'
 import { Op } from 'sequelize';
+import { createDocument, getHeader, getParticipatorConfirmation, getSidebar } from './document.controller.js';
+
 
 const mailgun = new Mailgun(formData);
 const mg = mailgun.client({
@@ -162,28 +165,72 @@ export async function addToTeamMailinglist(uuids, year) {
 	addToMailinglist('team' + year + '@' + (process.env.MAIL_LIST_DOMAIN || 'verteiler.lippesola.de'), uuids);
 }
 
+
+
+export async function sendMailToParents(orderId, positionId, type) {
+	const participator = await findOneParticipator({params: {
+		orderId: orderId,
+		positionId: positionId
+	}});
+	const mailConfiguration = await mailModel.findByPk(type);
+	let html = mailConfiguration.text;
+	html = html.replace('{{parentLastName}}', participator.parentLastName);
+	html = html.replace('{{participatorFirstName}}', participator.firstName);
+	html = html.replace('{{participatorLastName}}', participator.lastName);
+	const transporter = nodemailer.createTransport({
+		host: mail.booking.host,
+		port: mail.booking.port,
+		secure: false,
+		auth: {
+			user: mail.booking.user,
+			pass: mail.booking.pass
+		}
+	});
+	let buffers = [];
+	let doc = createDocument();
+	doc.on('data', buffers.push.bind(buffers));
+	doc.on('end', () => {
+		let pdfData = Buffer.concat(buffers);
+		transporter.sendMail({
+			from: '"Lippesola Anmeldung" <' + mail.booking.from + '>',
+			to: participator.parentMail,
+			subject: mailConfiguration.subject,
+			text: convert(html),
+			html: html,
+			attachments: [{
+				filename: 'Anmeldebestätigung.pdf',
+				content: pdfData,
+				contentType: 'application/pdf'
+			}]
+		});
+	});
+	getHeader(doc, 'Familie ' + participator.lastName + '\n' + participator.street + '\n' + participator.zipCode + ' ' + participator.city)
+	getParticipatorConfirmation(doc, participator)
+	await getSidebar(doc)
+	doc.end();
+}
+
 export async function sendMailToUser(uuid, type) {
 	const user = await userModel.findByPk(uuid);
 	const mailConfiguration = await mailModel.findByPk(type);
-	let transporter = nodemailer.createTransport({
-		host: mail.mailer.host,
-		port: mail.mailer.port,
-		secure: false,
-		auth: {
-			user: mail.mailer.user,
-			pass: mail.mailer.pass
-		}
-	});
 
 	let html = mailConfiguration.text;
 	html = html.replace('{{firstName}}', user.firstName);
 	html = html.replace('{{lastName}}', user.lastName);
 	let text = convert(html);
-
+	const transporter = nodemailer.createTransport({
+		host: mail.default.host,
+		port: mail.default.port,
+		secure: false,
+		auth: {
+			user: mail.default.user,
+			pass: mail.default.pass
+		}
+	});
 	let info = await transporter.sendMail({
-		from: '"LAMA" <' + mail.mailer.from + '>',
+		from: '"LAMA" <' + mail.default.from + '>',
 		to: user.mail,
-		bcc: mail.mailer.bcc,
+		bcc: mail.default.bcc,
 		subject: mailConfiguration.subject,
 		text: text,
 		html: html
