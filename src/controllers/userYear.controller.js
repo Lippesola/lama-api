@@ -93,22 +93,20 @@ export async function createOrUpdate(req, res) {
 				res.status(403).send('Du musst im LT sein, um Leute freischalten zu können')
 				return;
 			}
-			let groupId = '';
-			(await kcAdminClient.groups.find()).forEach((group) => {
+			(await kcAdminClient.groups.find()).forEach(async (group) => {
 				if (group.name == year) {
-					group.subGroups.forEach((subGroup) => {
+					(await kcAdminClient.groups.listSubGroups({parentId: group.id})).forEach((subGroup) => {
 						if (subGroup.name == (year + '_Team')) {
-							groupId = subGroup.id
+							kcAdminClient.users.addToGroup({
+								id: req.params.uuid,
+								groupId: subGroup.id
+							})
+							.then(() => {})
+							.catch((e) => {console.log(e);})
 						}
 					})
 				}
 			})
-			kcAdminClient.users.addToGroup({
-				id: req.params.uuid,
-				groupId: groupId
-			})
-			.then(() => {})
-			.catch((e) => {console.log(e);})
 			
 			addToTeamMailinglist(req.params.uuid, year);
 			sendMailToUser(req.params.uuid, 'confirmation');

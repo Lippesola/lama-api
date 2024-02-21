@@ -64,6 +64,9 @@ import userMotivationRouter from './src/routes/userMotivation.route.js'
 import userDocumentRouter from './src/routes/userDocument.route.js'
 import userPermissionRouter from './src/routes/userPermission.route.js'
 import userYearRouter from './src/routes/userYear.route.js'
+import participatorRouter from './src/routes/participator.route.js'
+import participatorQuestionRouter from './src/routes/participatorQuestion.route.js'
+import participatorQuestionCategoryRouter from './src/routes/participatorQuestionCategory.route.js';
 
 import threadRouter from './src/routes/thread.route.js'
 import postRouter from './src/routes/post.route.js'
@@ -95,6 +98,9 @@ app.use('/userMotivation', userMotivationRouter);
 app.use('/userDocument', userDocumentRouter);
 app.use('/userPermission', userPermissionRouter);
 app.use('/userYear', userYearRouter);
+app.use('/participator', participatorRouter);
+app.use('/participatorQuestion', participatorQuestionRouter);
+app.use('/participatorQuestionCategory', participatorQuestionCategoryRouter);
 
 app.use('/thread', threadRouter);
 app.use('/post', postRouter);
