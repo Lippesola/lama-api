@@ -12,7 +12,7 @@ async function isAllowed(req) {
 	const executingUser = req.kauth.grant.access_token.content.sub
 	const year = await settingModel.findByPk('currentYear')
 	const isLT = req.kauth.grant.access_token.content.groups?.includes(year + '_LT')
-	const allowed = isLT || (await userPermissionModel.findOne({where: { uuid: executingUser, permission: 'participator'}})).allowed
+	const allowed = isLT || (await userPermissionModel.findOne({where: { uuid: executingUser, permission: 'participator'}}))?.allowed
 	return allowed
 }
 
