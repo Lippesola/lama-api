@@ -1,13 +1,14 @@
 import { Router } from 'express';
 import keycloak from '../config/keycloak.js';
-import { findAll, findOne, create, update, deleteOne } from '../controllers/post.controller.js'
+import PostController from '../controllers/post.controller.js'
 
 var router = new Router();
+const postController = new PostController();
 
-    router.get('/', keycloak.protect(), findAll);
-    router.get('/:id', keycloak.protect(), findOne);
-    router.post('/', keycloak.protect(), create);
-    router.post('/:id', keycloak.protect(), update);
-    router.delete('/:id', keycloak.protect(), deleteOne);
+    router.get('/', keycloak.protect(), postController.getAll);
+    router.get('/:id', keycloak.protect(), postController.getOne);
+    router.post('/', keycloak.protect(), postController.create);
+    router.post('/:id', keycloak.protect(), postController.update);
+    router.delete('/:id', keycloak.protect(), postController.deleteOne);
 
 export default router
