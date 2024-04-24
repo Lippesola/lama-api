@@ -174,9 +174,9 @@ export async function sendMailToParents(orderId, positionId, type) {
 	}});
 	const mailConfiguration = await mailModel.findByPk(type);
 	let html = mailConfiguration.text;
-	html = html.replace('{{parentLastName}}', participator.parentLastName);
-	html = html.replace('{{participatorFirstName}}', participator.firstName);
-	html = html.replace('{{participatorLastName}}', participator.lastName);
+	html = html.replaceAll('{{parentLastName}}', participator.parentLastName);
+	html = html.replaceAll('{{participatorFirstName}}', participator.firstName);
+	html = html.replaceAll('{{participatorLastName}}', participator.lastName);
 	const transporter = nodemailer.createTransport({
 		host: mail.booking.host,
 		port: mail.booking.port,
@@ -186,28 +186,38 @@ export async function sendMailToParents(orderId, positionId, type) {
 			pass: mail.booking.pass
 		}
 	});
-	let buffers = [];
-	let doc = createDocument();
-	doc.on('data', buffers.push.bind(buffers));
-	doc.on('end', () => {
-		let pdfData = Buffer.concat(buffers);
+	if (type === 'participatorConfirmation') {
+		let buffers = [];
+		let doc = createDocument();
+		doc.on('data', buffers.push.bind(buffers));
+		doc.on('end', () => {
+			let pdfData = Buffer.concat(buffers);
+			transporter.sendMail({
+				from: '"Lippesola Anmeldung" <' + mail.booking.from + '>',
+				to: participator.parentMail,
+				subject: mailConfiguration.subject,
+				text: convert(html),
+				html: html,
+				attachments: [{
+					filename: 'Anmeldebestätigung.pdf',
+					content: pdfData,
+					contentType: 'application/pdf'
+				}]
+			});
+		});
+		getHeader(doc, 'Familie ' + participator.lastName + '\n' + participator.street + '\n' + participator.zipCode + ' ' + participator.city)
+		getParticipatorConfirmation(doc, participator)
+		await getSidebar(doc)
+		doc.end();
+	} else {
 		transporter.sendMail({
 			from: '"Lippesola Anmeldung" <' + mail.booking.from + '>',
 			to: participator.parentMail,
 			subject: mailConfiguration.subject,
 			text: convert(html),
-			html: html,
-			attachments: [{
-				filename: 'Anmeldebestätigung.pdf',
-				content: pdfData,
-				contentType: 'application/pdf'
-			}]
+			html: html
 		});
-	});
-	getHeader(doc, 'Familie ' + participator.lastName + '\n' + participator.street + '\n' + participator.zipCode + ' ' + participator.city)
-	getParticipatorConfirmation(doc, participator)
-	await getSidebar(doc)
-	doc.end();
+	}
 }
 
 export async function sendMailToUser(uuid, type) {
@@ -215,8 +225,8 @@ export async function sendMailToUser(uuid, type) {
 	const mailConfiguration = await mailModel.findByPk(type);
 
 	let html = mailConfiguration.text;
-	html = html.replace('{{firstName}}', user.firstName);
-	html = html.replace('{{lastName}}', user.lastName);
+	html = html.replaceAll('{{firstName}}', user.firstName);
+	html = html.replaceAll('{{lastName}}', user.lastName);
 	let text = convert(html);
 	const transporter = nodemailer.createTransport({
 		host: mail.default.host,
