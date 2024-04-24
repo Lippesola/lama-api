@@ -61,7 +61,8 @@ export async function createOrUpdate(req, res) {
 	/**
 	 * 0: not confirmed
 	 * 1: confirmed
-	 * 2: queued
+	 * 2: cancelled
+	 * 3: waiting list
 	 */
 	let currentStatus = 0;
 	if (participator) {
@@ -80,7 +81,7 @@ export async function createOrUpdate(req, res) {
 			case 1:
 				sendMail = 'participatorConfirmation'
 				break;
-			case 2:
+			case 3:
 				sendMail = 'participatorQueued'
 				break;
 			default:
