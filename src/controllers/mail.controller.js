@@ -180,7 +180,7 @@ export async function sendMailToParents(orderId, positionId, type) {
 	const transporter = nodemailer.createTransport({
 		host: mail.booking.host,
 		port: mail.booking.port,
-		secure: false,
+		secure: mail.booking.secure,
 		auth: {
 			user: mail.booking.user,
 			pass: mail.booking.pass
@@ -231,7 +231,7 @@ export async function sendMailToUser(uuid, type) {
 	const transporter = nodemailer.createTransport({
 		host: mail.default.host,
 		port: mail.default.port,
-		secure: false,
+		secure: mail.default.secure,
 		auth: {
 			user: mail.default.user,
 			pass: mail.default.pass
