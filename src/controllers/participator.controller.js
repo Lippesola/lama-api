@@ -42,7 +42,7 @@ export async function findAll(req, res) {
 	const participators = await participatorModel.findAll();
 	for (const [key, value] of Object.entries(participatorAnswers)) {
 		let participator = participators.find((participator) => participator.orderId === value.orderId && participator.positionId === value.positionId);
-		participatorAnswers[key] = {...{status: participator?.status || (value.paymentStatus === 'c' ? 2 : 0)}, ...value};
+		participatorAnswers[key] = {...{status: value.paymentStatus === 'c' ? 2 : (participator?.status || 0)}, ...value};
 	}
 	res.json(participatorAnswers);
 }
