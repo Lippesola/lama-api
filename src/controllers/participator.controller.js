@@ -42,7 +42,7 @@ export async function findAll(req, res) {
 	const participators = await participatorModel.findAll();
 	for (const [key, value] of Object.entries(participatorAnswers)) {
 		let participator = participators.find((participator) => participator.orderId === value.orderId && participator.positionId === value.positionId);
-		participatorAnswers[key] = {...{status: participator?.status || (value.paymentStatus === 'c' ? 2 : 0)}, ...value};
+		participatorAnswers[key] = {...{status: value.paymentStatus === 'c' ? 2 : (participator?.status || 0)}, ...value};
 	}
 	res.json(participatorAnswers);
 }
@@ -58,6 +58,12 @@ export async function createOrUpdate(req, res) {
 			positionId: req.params.positionId
 		}
 	});
+	/**
+	 * 0: not confirmed
+	 * 1: confirmed
+	 * 2: cancelled
+	 * 3: waiting list
+	 */
 	let currentStatus = 0;
 	if (participator) {
 		currentStatus = participator.status;
@@ -69,8 +75,21 @@ export async function createOrUpdate(req, res) {
 			...req.body
 		});
 	}
-	if (req.body.status === 1 && currentStatus !== 1) {
-		await sendMailToParents(req.params.orderId, req.params.positionId, 'participatorConfirmation');
+	if (req.body.status !== currentStatus) {
+		let sendMail = false;
+		switch (req.body.status) {
+			case 1:
+				sendMail = 'participatorConfirmation'
+				break;
+			case 3:
+				sendMail = 'participatorQueued'
+				break;
+			default:
+				break;
+		}
+		if (sendMail) {
+			await sendMailToParents(req.params.orderId, req.params.positionId, sendMail);
+		}
 	}
 	res.status(200).send();
 }
