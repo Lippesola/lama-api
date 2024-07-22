@@ -19,7 +19,7 @@
     "express-fileupload": "^1.5.0",
     "express-session": "^1.18.0",
     "html-to-text": "^9.0.5",
-    "mailgun.js": "^10.2.1",
+    "mailgun.js": "^10.2.3",
     "nodemailer": "^6.9.13",
     "mariadb": "^3.2.3",
     "pdfkit": "^0.15.0",
