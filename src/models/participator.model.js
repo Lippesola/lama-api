@@ -21,4 +21,11 @@ export default sequelize.define('Participator', {
      * 3: waiting list
      */
   },
+  preferenceId: {
+    type: DataTypes.INTEGER,
+    references: {
+        model: 'Preferences',
+        key: 'id'
+    }
+  },
 });

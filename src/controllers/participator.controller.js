@@ -38,13 +38,21 @@ export async function findAll(req, res) {
 		res.status(403).send('Not allowed');
 		return;
 	}
+	const participatorAnswers = await findAllParticipators();
+	res.json(participatorAnswers);
+}
+
+export async function findAllParticipators() {
 	const participatorAnswers = await getAllParticipatorsAnswers();
 	const participators = await participatorModel.findAll();
 	for (const [key, value] of Object.entries(participatorAnswers)) {
 		let participator = participators.find((participator) => participator.orderId === value.orderId && participator.positionId === value.positionId);
-		participatorAnswers[key] = {...{status: value.paymentStatus === 'c' ? 2 : (participator?.status || 0)}, ...value};
+		participatorAnswers[key] = {...{
+			preferenceId: participator?.preferenceId,
+			status: value.paymentStatus === 'c' ? 2 : (participator?.status || 0)
+		}, ...value};
 	}
-	res.json(participatorAnswers);
+	return participatorAnswers;
 }
 
 export async function createOrUpdate(req, res) {
