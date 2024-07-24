@@ -67,6 +67,9 @@ import userYearRouter from './src/routes/userYear.route.js'
 import participatorRouter from './src/routes/participator.route.js'
 import participatorQuestionRouter from './src/routes/participatorQuestion.route.js'
 import participatorQuestionCategoryRouter from './src/routes/participatorQuestionCategory.route.js';
+import groupRouter from './src/routes/group.route.js'
+import groupUserRouter from './src/routes/groupUser.route.js'
+import preferenceRouter from './src/routes/preference.route.js'
 
 import threadRouter from './src/routes/thread.route.js'
 import postRouter from './src/routes/post.route.js'
@@ -81,6 +84,11 @@ import supporterDayModel from './src/models/supporterDay.model.js';
 import userDocumentModel from './src/models/userDocument.model.js';
 import userPermissionModel from './src/models/userPermission.model.js';
 import userMotivationModel from './src/models/userMotivation.model.js';
+
+import groupModel from './src/models/group.model.js';
+import groupUserModel from './src/models/groupUser.model.js';
+import preferenceModel from './src/models/preference.model.js';
+import participatorModel from './src/models/participator.model.js';
 
 app.use('/avatar', avatarRouter);
 app.use('/event', eventRouter);
@@ -101,6 +109,9 @@ app.use('/userYear', userYearRouter);
 app.use('/participator', participatorRouter);
 app.use('/participatorQuestion', participatorQuestionRouter);
 app.use('/participatorQuestionCategory', participatorQuestionCategoryRouter);
+app.use('/group', groupRouter);
+app.use('/groupUser', groupUserRouter);
+app.use('/preference', preferenceRouter);
 
 app.use('/thread', threadRouter);
 app.use('/post', postRouter);
@@ -132,3 +143,15 @@ userMotivationModel.hasOne(userModel, {foreignKey: 'uuid'})
 
 userModel.hasMany(userPermissionModel, {foreignKey: 'uuid'})
 userPermissionModel.hasOne(userModel, {foreignKey: 'uuid'})
+
+groupModel.hasMany(groupUserModel, {foreignKey: 'groupId'})
+groupUserModel.hasOne(groupModel, {foreignKey: 'id'})
+
+userModel.hasMany(groupUserModel, {foreignKey: 'uuid', sourceKey: 'uuid'})
+groupUserModel.hasOne(userModel, {foreignKey: 'uuid', sourceKey: 'uuid'})
+
+preferenceModel.hasMany(participatorModel, {foreignKey: 'preferenceId'})
+participatorModel.hasOne(preferenceModel, {foreignKey: 'id'})
+
+groupModel.hasMany(preferenceModel, {foreignKey: 'groupId'})
+preferenceModel.hasOne(groupModel, {foreignKey: 'id'})
