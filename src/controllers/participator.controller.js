@@ -49,7 +49,8 @@ export async function findAllParticipators() {
 		let participator = participators.find((participator) => participator.orderId === value.orderId && participator.positionId === value.positionId);
 		participatorAnswers[key] = {...{
 			preferenceId: participator?.preferenceId,
-			status: value.paymentStatus === 'c' ? 2 : (participator?.status || 0)
+			status: value.paymentStatus === 'c' ? 2 : (participator?.status || 0),
+			ignoredWishes: participator?.ignoredWishes
 		}, ...value};
 	}
 	return participatorAnswers;

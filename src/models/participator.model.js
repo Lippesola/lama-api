@@ -28,4 +28,8 @@ export default sequelize.define('Participator', {
         key: 'id'
     }
   },
+  ignoredWishes: {
+    type: DataTypes.STRING,
+    allowNull: true
+  } 
 });
