@@ -22,36 +22,31 @@ export async function findAll(req, res) {
 		return;
 	}
 	let data = {}
+	data.include = [];
 	if (typeof req.query.participatorBundle !== 'undefined') {
 		delete req.query.participatorBundle
 		data.subQuery = false
-		data.include = [
-			{
-				model: preferenceModel,
-				include: [
-					{
-						model: participatorModel
-					}
-				]
-			},
-			{
-				model: groupUserModel,
-				include: [
-					{
-						model: userModel,
-						include: [
-							{
-								model: userYearModel,
-								where: {
-									year: (await settingModel.findByPk('currentYear')).value
-								}
-							}
-						]
-					}
-				]
-			}
-		]
+		data.include.push({
+			model: preferenceModel,
+			include: [{model: participatorModel}]
+		})
 	}
+	if (typeof req.query.userBundle !== 'undefined')
+		{
+			delete req.query.userBundle
+			data.include.push({
+				model: groupUserModel,
+				include: [{
+					model: userModel,
+					include: [{
+						model: userYearModel,
+						where: {
+							year: (await settingModel.findByPk('currentYear')).value
+						}
+					}]
+				}]
+			})
+		}
 	try {
 		data.where = req.query
 		const group = await groupModel.findAll(data)

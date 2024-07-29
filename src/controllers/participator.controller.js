@@ -4,6 +4,7 @@ import participatorQuestionModel from '../models/participatorQuestion.model.js';
 import userPermissionModel from '../models/userPermission.model.js';
 import settingModel from '../models/setting.model.js';
 import { sendMailToParents } from './mail.controller.js';
+import preferenceModel from '../models/preference.model.js';
 
 const questionMapper = await getPretixMapper();
 const teenWeek = 27;
@@ -47,8 +48,10 @@ export async function findAllParticipators() {
 	const participators = await participatorModel.findAll();
 	for (const [key, value] of Object.entries(participatorAnswers)) {
 		let participator = participators.find((participator) => participator.orderId === value.orderId && participator.positionId === value.positionId);
+		const preference = await preferenceModel.findByPk(participator?.preferenceId);
 		participatorAnswers[key] = {...{
 			preferenceId: participator?.preferenceId,
+			groupId: preference?.groupId,
 			status: value.paymentStatus === 'c' ? 2 : (participator?.status || 0),
 			ignoredWishes: participator?.ignoredWishes
 		}, ...value};
