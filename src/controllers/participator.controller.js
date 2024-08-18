@@ -4,6 +4,7 @@ import participatorQuestionModel from '../models/participatorQuestion.model.js';
 import userPermissionModel from '../models/userPermission.model.js';
 import settingModel from '../models/setting.model.js';
 import { sendMailToParents } from './mail.controller.js';
+import preferenceModel from '../models/preference.model.js';
 
 const questionMapper = await getPretixMapper();
 const teenWeek = 27;
@@ -38,13 +39,24 @@ export async function findAll(req, res) {
 		res.status(403).send('Not allowed');
 		return;
 	}
+	const participatorAnswers = await findAllParticipators();
+	res.json(participatorAnswers);
+}
+
+export async function findAllParticipators() {
 	const participatorAnswers = await getAllParticipatorsAnswers();
 	const participators = await participatorModel.findAll();
 	for (const [key, value] of Object.entries(participatorAnswers)) {
 		let participator = participators.find((participator) => participator.orderId === value.orderId && participator.positionId === value.positionId);
-		participatorAnswers[key] = {...{status: participator?.status || (value.paymentStatus === 'c' ? 2 : 0)}, ...value};
+		const preference = await preferenceModel.findByPk(participator?.preferenceId);
+		participatorAnswers[key] = {...{
+			preferenceId: participator?.preferenceId,
+			groupId: preference?.groupId,
+			status: value.paymentStatus === 'c' ? 2 : (participator?.status || 0),
+			ignoredWishes: participator?.ignoredWishes
+		}, ...value};
 	}
-	res.json(participatorAnswers);
+	return participatorAnswers;
 }
 
 export async function createOrUpdate(req, res) {
@@ -58,6 +70,12 @@ export async function createOrUpdate(req, res) {
 			positionId: req.params.positionId
 		}
 	});
+	/**
+	 * 0: not confirmed
+	 * 1: confirmed
+	 * 2: cancelled
+	 * 3: waiting list
+	 */
 	let currentStatus = 0;
 	if (participator) {
 		currentStatus = participator.status;
@@ -69,8 +87,21 @@ export async function createOrUpdate(req, res) {
 			...req.body
 		});
 	}
-	if (req.body.status === 1 && currentStatus !== 1) {
-		await sendMailToParents(req.params.orderId, req.params.positionId, 'participatorConfirmation');
+	if (req.body.status !== currentStatus) {
+		let sendMail = false;
+		switch (req.body.status) {
+			case 1:
+				sendMail = 'participatorConfirmation'
+				break;
+			case 3:
+				sendMail = 'participatorQueued'
+				break;
+			default:
+				break;
+		}
+		if (sendMail) {
+			await sendMailToParents(req.params.orderId, req.params.positionId, sendMail);
+		}
 	}
 	res.status(200).send();
 }
