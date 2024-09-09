@@ -20,7 +20,7 @@
     "express-session": "^1.18.0",
     "html-to-text": "^9.0.5",
     "mailgun.js": "^10.2.3",
-    "nodemailer": "^6.9.13",
+    "nodemailer": "^6.9.15",
     "mariadb": "^3.2.3",
     "pdfkit": "^0.15.0",
     "keycloak-connect": "^25.0.2",
