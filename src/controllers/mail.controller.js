@@ -147,9 +147,16 @@ export async function addToMailinglist(mailingList, uuids) {
 	}
 	uuids.forEach(async (uuid) => {
 		console.log(uuid);
-		const user = await userModel.findByPk(uuid);
+		let user = {};
+		if (uuid.includes('@')) {
+			user = {
+				mail: uuid
+			}
+		} else {
+			user = await userModel.findByPk(uuid);
+		}
 		console.log(user);
-		if (!user) return;
+		if (!user.mail) return;
 		mg.lists.members.createMember(mailingList, {
 			address: user.mail || '',
 			name: user.firstName || '' + ' ' + user.lastName || '',
@@ -165,7 +172,34 @@ export async function addToTeamMailinglist(uuids, year) {
 	addToMailinglist('team' + year + '@' + (process.env.MAIL_LIST_DOMAIN || 'verteiler.lippesola.de'), uuids);
 }
 
-
+export async function sendNewsletterConfirmMail(mailAddress, token) {
+	const confirmLink = process.env.LAMA_API_URL + '/mailingListToken/' + token;
+	const html = '<p>'
+		+ 'Vielen Dank für deine Anmeldung zum Lippesola Newsletter.<br>'
+		+ 'Bitte bestätige deine Anmeldung durch Klick auf den folgenden Link: <br>'
+		+ '<a href="' + confirmLink + '">' + confirmLink + '</a>'
+		+ '</p>'
+		+ '<p>'
+		+ 'Solltest du keine Anmeldung vorgenommen haben, kannst du diese E-Mail ignorieren.'
+		+ '</p>';
+	const transporter = nodemailer.createTransport({
+		host: mail.default.host,
+		port: mail.default.port,
+		secure: mail.default.secure,
+		auth: {
+			user: mail.default.user,
+			pass: mail.default.pass
+		}
+	});
+	transporter.sendMail({
+		from: '"Lippesola Newsletter" <' + mail.default.from + '>',
+		to: mailAddress,
+		subject: 'Newsletter Anmeldung bestätigen',
+		text: convert(html),
+		html: html
+	});
+	
+}
 
 export async function sendMailToParents(orderId, positionId, type) {
 	const participator = await findOneParticipator({params: {

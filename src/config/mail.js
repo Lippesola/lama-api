@@ -20,5 +20,6 @@ export default {
     from: process.env.SMTP_BOOKING_FROM || process.env.SMTP_FROM || "lama@example.com",
     pass: process.env.SMTP_BOOKING_PASS || process.env.SMTP_PASS || "password",
     secure: process.env.SMTP_BOOKING_SECURE || process.env.SMTP_SECURE || false,
-  }
+  },
+  subscribeLists: JSON.parse(process.env.SUBSCRIBE_LISTS || '[]')
 };

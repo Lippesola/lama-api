@@ -37,12 +37,15 @@ import { registration } from './src/controllers/registration.controller.js';
 import { findAll as getAllEvents } from './src/controllers/event.controller.js';
 import { findAll as getAllSettings } from './src/controllers/setting.controller.js';
 import { create as createSupporterYear } from './src/controllers/supporterYear.controller.js';
+import { findOne, create } from './src/controllers/mailingListToken.controller.js';
 
 app.get("/", (req, res) => {res.json({ message: "up" });});
 app.post('/registration', registration)
 app.get('/event', getAllEvents);
 app.get('/setting', getAllSettings);
 app.post('/supporterYear', createSupporterYear)
+app.get('/mailingListToken/:token', findOne)
+app.post('/mailingListToken', create)
 
 // protected routes
 import keycloak from './src/config/keycloak.js'
