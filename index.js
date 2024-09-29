@@ -18,8 +18,19 @@ async function initSequelize() {
 	  }	
 }
 
+let origin = process.env.ORIGIN_URL || "";
+if (origin) {
+	try {
+		origin = JSON.parse(origin);
+	} catch (e) {
+		origin = [origin];
+	}
+} else {
+	origin = [];
+}
+origin.push(process.env.LAMA_APP_URL || "http://localhost:9000");
 var corsOptions = {
-  origin: process.env.LAMA_APP_URL || "http://localhost:9000"
+  origin: origin,
 };
 
 app.use(cors(corsOptions));
