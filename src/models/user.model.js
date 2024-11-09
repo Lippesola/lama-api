@@ -129,4 +129,9 @@ export default sequelize.define('User', {
     type: DataTypes.BOOLEAN,
     validate: {}
   },
+  plate: {
+    type: DataTypes.STRING,
+    validate: {},
+    public: false
+  }
 });
