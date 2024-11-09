@@ -185,6 +185,13 @@ export default sequelize.define('UserYear', {
       max: 3
     }
   },
+  wishAcademy: {
+    type: DataTypes.TINYINT,
+    validate: {
+      min: 0,
+      max: 3
+    }
+  },
   wishOther: {
     type: DataTypes.TINYINT,
     validate: {
@@ -197,5 +204,12 @@ export default sequelize.define('UserYear', {
   },
   comment: {
     type: DataTypes.TEXT
+  },
+  assignee: {
+    type: DataTypes.UUID,
+    references: {
+        model: 'Users',
+        key: 'uuid'
+    }
   }
 });

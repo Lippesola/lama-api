@@ -6,6 +6,7 @@ import userModel from "../models/user.model.js";
 import userDocumentModel from "../models/userDocument.model.js";
 import userPermissionModel from "../models/userPermission.model.js";
 import { addToTeamMailinglist, sendMailToUser } from "./mail.controller.js";
+import { Op } from "sequelize";
 
 export async function findAll(req, res) {
 	const year = req.query.year || (await settingModel.findByPk('currentYear')).value
@@ -33,6 +34,13 @@ export async function findAll(req, res) {
 			}
 		}
 	}
+	if (typeof req.query.assigneeBundle !== 'undefined') {
+		data['include'].push({
+			model: userModel,
+			as: 'AssigneeModel'
+		})
+	}
+	
 	if (isLT || permissions.find(permission => permission.permission === 'userDocument')?.allowed) {
 		if (typeof req.query.documentBundle !== 'undefined') {
 			userYearModel.belongsTo(userDocumentModel, {foreignKey: 'uuid', targetKey: 'uuid'})
@@ -42,6 +50,7 @@ export async function findAll(req, res) {
 		}
 	}
 	delete req.query.userBundle
+	delete req.query.assigneeBundle
 	delete req.query.documentBundle
 	data['where'] = req.query
 	try {
@@ -116,4 +125,33 @@ export async function createOrUpdate(req, res) {
 	} else {
 		res.status(400).send()
 	}
+}
+
+export async function additionalInfo(req, res) {
+	const uuid = req.params.uuid || req.kauth.grant.access_token.content.sub
+	const year = req.params.year || (await settingModel.findByPk('currentYear')).value
+	let isLeader = false;
+	await kcAdminClient.users.listGroups({id: uuid}).then((groups) => {
+		groups.forEach((group) => {
+			if (group.name === year + '_LT') {
+				isLeader = true;
+				return
+			}
+		})
+	});
+	const userYear = await userYearModel.findAll({
+		where: {
+			uuid: req.params.uuid,
+			status: 4,
+			year: {
+				[Op.ne]: (await settingModel.findByPk('currentYear')).value
+			}
+		}
+	})
+	console.log(userYear);
+	const isNew = !userYear.length;
+	res.status(200).send({
+		isLeader: isLeader,
+		isNew: isNew
+	});
 }

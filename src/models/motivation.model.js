@@ -18,4 +18,13 @@ export default sequelize.define('Motivation', {
   hint: {
     type: DataTypes.TEXT
   },
+  showForNew: {
+    type: DataTypes.BOOLEAN
+  },
+  showForExisting: {
+    type: DataTypes.BOOLEAN
+  },
+  showForLeader: {
+    type: DataTypes.BOOLEAN
+  }
 });

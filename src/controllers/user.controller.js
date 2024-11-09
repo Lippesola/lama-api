@@ -44,6 +44,7 @@ export async function findAll(req, res) {
 		const user = await userModel.findAll(findAllConfig)
 		res.status(200).send(user)
 	} catch(e) {
+		console.log(e);
 		res.status(400).send()
 	}
 }

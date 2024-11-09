@@ -140,8 +140,9 @@ app.listen(PORT, () => {
 await initSequelize()
 
 
+userYearModel.belongsTo(userModel, {as: 'UserModel', foreignKey: 'uuid'})
 userModel.hasMany(userYearModel, {foreignKey: 'uuid'})
-userYearModel.hasOne(userModel, {foreignKey: 'uuid'})
+userYearModel.belongsTo(userModel, {as: 'AssigneeModel', foreignKey: 'assignee'})
 
 userModel.hasMany(responsibilityModel, {foreignKey: 'uuid'})
 responsibilityModel.hasOne(userModel, {foreignKey: 'uuid'})
