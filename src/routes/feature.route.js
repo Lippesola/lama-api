@@ -4,8 +4,8 @@ import { findAll, findOne, create, update } from '../controllers/feature.control
 
 var router = new Router();
 
-    router.get('/', keycloak.protect(), findAll);
-    router.get('/:id', keycloak.protect(), findOne);
+    router.get('/', findAll);
+    router.get('/:id', findOne);
     router.post('/', keycloak.protect(['admin']), create);
     router.post('/:id', keycloak.protect(['admin']), update);
 

@@ -39,14 +39,6 @@ export default sequelize.define('User', {
     },
     public: true
   },
-  relationship: {
-    type: DataTypes.TINYINT,
-    validate: {
-      notEmpty: true,
-      isIn: [[0, 1, 2]]
-    },
-    public: false
-  },
   mail: {
     type: DataTypes.STRING,
     validate: {
