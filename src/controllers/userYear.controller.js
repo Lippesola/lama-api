@@ -20,7 +20,8 @@ export async function findAll(req, res) {
 	data['include'] = []
 	if (typeof req.query.userBundle !== 'undefined') {
 		data['include'].push({
-			model: userModel
+			model: userModel,
+			as: 'UserModel'
 		})
 		if (!isLT) {
 			let attributes = [];
