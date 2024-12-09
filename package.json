@@ -23,7 +23,7 @@
     "nodemailer": "^6.9.15",
     "mariadb": "^3.4.0",
     "pdfkit": "^0.15.0",
-    "keycloak-connect": "^26.0.5",
+    "keycloak-connect": "^26.0.7",
     "sequelize": "^6.37.5"
   }
 }
