@@ -22,7 +22,7 @@
     "mailgun.js": "^10.2.3",
     "nodemailer": "^6.9.15",
     "mariadb": "^3.4.0",
-    "pdfkit": "^0.15.0",
+    "pdfkit": "^0.15.2",
     "keycloak-connect": "^26.0.5",
     "sequelize": "^6.37.5"
   }
