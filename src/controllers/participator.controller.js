@@ -7,8 +7,6 @@ import { sendMailToParents } from './mail.controller.js';
 import preferenceModel from '../models/preference.model.js';
 
 const questionMapper = await getPretixMapper();
-const teenWeek = 49;
-
 async function isAllowed(req) {
 	const executingUser = req.kauth.grant.access_token.content.sub
 	const year = (await settingModel.findByPk('currentYear')).value
@@ -159,7 +157,7 @@ async function getOneParticipatorAnswers(orderId, positionId) {
 	return {
 		...mapOrderInfo(order),
 		...mapPositionInfo(position),
-		...{week: position.item === teenWeek ? 'teens' : 'kids',}
+		...{week: (position.item == pretix.teensWeek) ? 'teens' : (position.item == pretix.kidsWeek) ? 'kids' : '',}
 	};
 }
 
@@ -190,7 +188,7 @@ async function getAllParticipatorsAnswers(page = 1, summarized = {}) {
 					...{
 						orderId: order.code,
 						positionId: position.positionid,
-						week: position.item === teenWeek ? 'teens' : 'kids'
+						week: (position.item == pretix.teensWeek) ? 'teens' : (position.item == pretix.kidsWeek) ? 'kids' : '',
 					},
 				};
 			}
