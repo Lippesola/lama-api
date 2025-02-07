@@ -7,11 +7,9 @@ import { sendMailToParents } from './mail.controller.js';
 import preferenceModel from '../models/preference.model.js';
 
 const questionMapper = await getPretixMapper();
-const teenWeek = 27;
-
 async function isAllowed(req) {
 	const executingUser = req.kauth.grant.access_token.content.sub
-	const year = await settingModel.findByPk('currentYear')
+	const year = (await settingModel.findByPk('currentYear')).value
 	const isLT = req.kauth.grant.access_token.content.groups?.includes(year + '_LT')
 	const allowed = isLT || (await userPermissionModel.findOne({where: { uuid: executingUser, permission: 'participator'}}))?.allowed
 	return allowed
@@ -159,7 +157,7 @@ async function getOneParticipatorAnswers(orderId, positionId) {
 	return {
 		...mapOrderInfo(order),
 		...mapPositionInfo(position),
-		...{week: position.item === teenWeek ? 'teens' : 'kids',}
+		...{week: (position.item == pretix.teensWeek) ? 'teens' : (position.item == pretix.kidsWeek) ? 'kids' : '',}
 	};
 }
 
@@ -190,7 +188,7 @@ async function getAllParticipatorsAnswers(page = 1, summarized = {}) {
 					...{
 						orderId: order.code,
 						positionId: position.positionid,
-						week: position.item === teenWeek ? 'teens' : 'kids'
+						week: (position.item == pretix.teensWeek) ? 'teens' : (position.item == pretix.kidsWeek) ? 'kids' : '',
 					},
 				};
 			}

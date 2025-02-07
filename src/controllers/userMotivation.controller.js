@@ -2,7 +2,7 @@ import userMotivationModel from '../models/userMotivation.model.js'
 import settingModel from '../models/setting.model.js'
 
 export async function findAll(req, res) {
-	const year = req.query.year || await settingModel.findByPk('currentYear')
+	const year = req.query.year || (await settingModel.findByPk('currentYear')).value
 	const isLT = req.kauth.grant.access_token.content.groups?.includes(year + '_LT')
 	if (!isLT) {
 		res.status(403).send()

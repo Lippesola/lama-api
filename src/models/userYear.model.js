@@ -87,13 +87,6 @@ export default sequelize.define('UserYear', {
       max: 1
     }
   },
-  trainer: {
-    type: DataTypes.TINYINT,
-    validate: {
-      min: 0,
-      max: 1
-    }
-  },
   dayLeader: {
     type: DataTypes.TINYINT,
     validate: {
