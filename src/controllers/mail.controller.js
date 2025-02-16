@@ -172,6 +172,10 @@ export async function addToTeamMailinglist(uuids, year) {
 	addToMailinglist('team' + year + '@' + (process.env.MAIL_LIST_DOMAIN || 'verteiler.lippesola.de'), uuids);
 }
 
+export async function addToSupportMailinglist(mail, year) {
+	addToMailinglist('helfer' + year + '@' + (process.env.MAIL_LIST_DOMAIN || 'verteiler.lippesola.de'), mail);
+}
+
 export async function sendNewsletterConfirmMail(mailAddress, token) {
 	const confirmLink = process.env.LAMA_API_URL + '/mailingListToken/' + token;
 	const html = '<p>'

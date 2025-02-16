@@ -54,7 +54,7 @@ export function getParticipatorConfirmation(doc, participator) {
     doc.text('Rechtzeitig vor Beginn des Sommerlagers senden wir Ihnen alle weiteren Infounterlagen (Packliste, Wegbeschreibungen, etc.) zu.', {width: doc.page.width * leftWidth, align: 'justify'}).moveDown();
     doc.text('Mit freundlichen Grüßen,', {width: doc.page.width * leftWidth}).moveDown(0.3);
     doc.text('im Auftrag', {width: doc.page.width * leftWidth}).moveDown(1.5);
-    doc.font('signature').fontSize(12).text('Ihr Sola-Team', {width: doc.page.width * leftWidth}).moveDown(0.5);
+    doc.font('signature').fontSize(12).text('Ihr SOLA-Team', {width: doc.page.width * leftWidth}).moveDown(0.5);
     doc.font('regular').fontSize(8).text('Dieses Schreiben wurde im Rahmen unserer Teilnehmeranmeldung maschinell erstellt und ist daher auch mit Faksimile-Unterschrift gültig.', {width: doc.page.width * leftWidth}).moveDown();
 }
 

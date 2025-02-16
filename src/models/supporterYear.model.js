@@ -170,6 +170,14 @@ export default sequelize.define('SupporterYear', {
   supportOther: {
     type: DataTypes.TEXT,
     validate: {}
+  },
+  isConfirmed: {
+    type: DataTypes.BOOLEAN,
+    validate: {}
+  },
+  internalComment: {
+    type: DataTypes.TEXT,
+    validate: {}
   }
   
 });

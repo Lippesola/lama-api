@@ -4,6 +4,7 @@ import keycloak from '../config/keycloak.js';
 import settingModel from "../models/setting.model.js";
 import supporterDayModel from "../models/supporterDay.model.js";
 import { ValidationError } from 'sequelize';
+import { addToSupportMailinglist } from "./mail.controller.js";
 
 export async function findAll(req, res) {
 	const year = req.query.year || (await settingModel.findByPk('currentYear')).value
@@ -48,6 +49,8 @@ export async function create(req, res) {
 	const year = (await settingModel.findByPk('currentYear')).value
 	var data = req.body
 	data.year = year
+	data.isConfirmed = false;
+	data.internalComment = ''
 	try {
 		const supporterYear = await supporterYearModel.create(data)
 		req.body.days.forEach(async (day) => {
@@ -80,8 +83,24 @@ export async function update(req, res) {
 		res.status(403).send()
 		return;
 	}
+
+	if (!req.params.uuid) {
+		res.status(400).send('bad request')
+		return;
+	}
+
+	const supporterYear = (await supporterYearModel.findByPk(req.params.uuid))
+	if (!supporterYear) {
+		res.status(404).send('not found')
+		return;
+	}
+
+	if (!supporterYear.isConfirmed && req.body.isConfirmed) {
+		addToSupportMailinglist(supporterYear.mail, year);
+	}
+
 	try {
-		await supporterYearModel.update(data, {where: {uuid: req.params.uuid}});
+		await supporterYearModel.update(req.body, {where: {uuid: req.params.uuid}});
 		res.status(200).send()
 	} catch(e) {
 		if (e instanceof ValidationError) {
