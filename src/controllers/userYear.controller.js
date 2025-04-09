@@ -119,7 +119,7 @@ export async function createOrUpdate(req, res) {
 			})
 			
 			addToTeamMailinglist(req.params.uuid, year);
-			sendMailToUser(req.params.uuid, 'confirmation');
+			sendMailToUser(req.params.uuid, 'confirmation', 'supporter');
 		}
 		userYearModel.update(data, {where: {uuid: req.params.uuid, year: req.params.year}});
 		res.status(200).send(userYear)

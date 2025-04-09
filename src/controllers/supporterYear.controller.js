@@ -4,7 +4,7 @@ import keycloak from '../config/keycloak.js';
 import settingModel from "../models/setting.model.js";
 import supporterDayModel from "../models/supporterDay.model.js";
 import { ValidationError } from 'sequelize';
-import { addToSupportMailinglist } from "./mail.controller.js";
+import { addToSupportMailinglist, sendMailToUser } from "./mail.controller.js";
 
 export async function findAll(req, res) {
 	const year = req.query.year || (await settingModel.findByPk('currentYear')).value
@@ -97,6 +97,7 @@ export async function update(req, res) {
 
 	if (!supporterYear.isConfirmed && req.body.isConfirmed) {
 		addToSupportMailinglist(supporterYear.mail, year);
+		sendMailToUser(req.params.uuid, 'confirmation', 'supporter');
 	}
 
 	try {

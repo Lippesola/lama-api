@@ -10,6 +10,8 @@ import userPermissionModel from '../models/userPermission.model.js';
 import { findOne as findOneParticipator } from './participator.controller.js'
 import { Op } from 'sequelize';
 import { createDocument, getHeader, getParticipatorConfirmation, getSidebar } from './document.controller.js';
+import supporterYearModel from '../models/supporterYear.model.js';
+import supporterDayModel from '../models/supporterDay.model.js';
 
 
 const mailgun = new Mailgun(formData);
@@ -258,13 +260,36 @@ export async function sendMailToParents(orderId, positionId, type) {
 	}
 }
 
-export async function sendMailToUser(uuid, type) {
-	const user = await userModel.findByPk(uuid);
+export async function sendMailToUser(uuid, type, userType = 'user') {
+	let user;
+	if (userType === 'supporter') {
+		user = await supporterYearModel.findByPk(uuid);
+		type = 'supporter' + type.charAt(0).toUpperCase() + type.slice(1);
+	} else {
+		user = await userModel.findByPk(uuid);
+	}
 	const mailConfiguration = await mailModel.findByPk(type);
 
 	let html = mailConfiguration.text;
 	html = html.replaceAll('{{firstName}}', user.firstName);
 	html = html.replaceAll('{{lastName}}', user.lastName);
+	if (userType === 'supporter') {
+		const supporterDays = await supporterDayModel.findAll({
+			where: {
+				uuid: user.uuid
+			}
+		});
+		const days = supporterDays.map(element => 
+			new Date(element.day).toLocaleDateString('de-DE', {
+				day: '2-digit',
+				month: '2-digit',
+				year: 'numeric'
+			})
+		);
+		html = html.replaceAll('{{supporterDays}}', days.length > 0 ? days.join(', ') : 'Keine Termine eingetragen');
+
+		html = html.replaceAll('{{supporterContact}}', user.mail + (user.phone ? ', ' + user.phone : '') + (user.mobile ? ', ' + user.mobile : ''));
+	}
 	let text = convert(html);
 	const transporter = nodemailer.createTransport({
 		host: mail.default.host,
