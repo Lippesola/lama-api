@@ -31,20 +31,11 @@ export async function findAll(req, res) {
 			include: [{model: participatorModel}]
 		})
 	}
-	if (typeof req.query.userBundle !== 'undefined')
+	if (typeof req.query.groupUserBundle !== 'undefined')
 		{
-			delete req.query.userBundle
+			delete req.query.groupUserBundle
 			data.include.push({
-				model: groupUserModel,
-				include: [{
-					model: userModel,
-					include: [{
-						model: userYearModel,
-						where: {
-							year: (await settingModel.findByPk('currentYear')).value
-						}
-					}]
-				}]
+				model: groupUserModel
 			})
 		}
 	try {
