@@ -51,7 +51,7 @@ export async function createOrUpdate(req, res) {
 	}
 	const groupUser = await groupUserModel.findOne({where: {groupId: req.params.group, uuid: req.params.uuid}})
 	if (groupUser) {
-		groupUserModel.update(req.body);
+		groupUser.update(req.body);
 		res.status(200).send(groupUser)
 	} else {
 		var data = req.body

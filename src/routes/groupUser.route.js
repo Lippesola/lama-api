@@ -5,7 +5,7 @@ import { findAll, findOne, createOrUpdate, deleteOne } from "../controllers/grou
 var router = new Router();
 router.get('/', keycloak.protect(), findAll);
 router.get('/:group/:uuid', keycloak.protect(), findOne);
-router.post('/', keycloak.protect(), createOrUpdate);
+router.post('/:group/:uuid', keycloak.protect(), createOrUpdate);
 router.delete('/:group/:uuid', keycloak.protect(), deleteOne);
 
 export default router
