@@ -2,6 +2,13 @@ import userDocumentModel from '../models/userDocument.model.js'
 import settingModel from '../models/setting.model.js'
 import userPermissionModel from '../models/userPermission.model.js'
 
+const documentTypes = [
+	'criminalRecord',
+	'selfCommitment',
+	'privacyCommitment',
+	'parentalConsent'
+]
+
 export async function findAll(req, res) {
 	const executingUser = req.kauth.grant.access_token.content.sub
 	const year = req.query.year || (await settingModel.findByPk('currentYear')).value
@@ -50,7 +57,7 @@ export async function createOrUpdate(req, res) {
 		res.status(403).send()
 		return;
 	}
-	if (!req.params || !req.params.uuid || (!req.body.criminalRecord && !req.body.selfCommitment)) {
+	if (!req.params?.uuid || !documentTypes.some(type => req.body[type])) {
 		res.status(400).send('bad request')
 		return;
 	}
