@@ -15,5 +15,11 @@ export default sequelize.define('UserDocument', {
   },
   selfCommitment: {
     type: DataTypes.INTEGER
+  },
+  privacyCommitment: {
+    type: DataTypes.INTEGER
+  },
+  parentalConsent: {
+    type: DataTypes.INTEGER
   }
 });
