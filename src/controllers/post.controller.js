@@ -39,8 +39,7 @@ export async function update(req, res) {
 		res.status(400).send('bad request')
 		return;
 	}
-	const year = (await settingModel.findByPk('currentYear')).value
-	const isLT = req.kauth.grant.access_token.content.groups?.includes(year + '_LT')
+	const isLT = req.kauth.grant.access_token.content.groups?.includes('Leitungsteam')
 	const post = await postModel.findByPk(req.params.id)
 	if (post) {
 		if (req.kauth.grant.access_token.content.sub !== post.createdBy && !isLT) {
@@ -59,8 +58,7 @@ export async function deleteOne(req, res) {
 		res.status(400).send('bad request')
 		return;
 	}
-	const year = (await settingModel.findByPk('currentYear')).value
-	const isLT = req.kauth.grant.access_token.content.groups?.includes(year + '_LT')
+	const isLT = req.kauth.grant.access_token.content.groups?.includes('Leitungsteam')
 	const post = await postModel.findByPk(req.params.id)
 	if (post) {
 		if (req.kauth.grant.access_token.content.sub !== post.createdBy && !isLT) {

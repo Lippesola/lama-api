@@ -4,8 +4,7 @@ import settingModel from '../models/setting.model.js'
 
 async function isAllowed(req) {
 	const executingUser = req.kauth.grant.access_token.content.sub
-	const year = (await settingModel.findByPk('currentYear')).value
-	const isLT = req.kauth.grant.access_token.content.groups?.includes(year + '_LT')
+	const isLT = req.kauth.grant.access_token.content.groups?.includes('Leitungsteam')
 	const allowed = isLT || (await userPermissionModel.findOne({where: { uuid: executingUser, permission: 'participator'}}))?.allowed
 	return allowed
 }

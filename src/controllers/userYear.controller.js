@@ -9,8 +9,7 @@ import { addToTeamMailinglist, sendMailToUser } from "./mail.controller.js";
 import { Op } from "sequelize";
 
 export async function findAll(req, res) {
-	const year = req.query.year || (await settingModel.findByPk('currentYear')).value
-	const isLT = req.kauth.grant.access_token.content.groups?.includes(year + '_LT')
+	const isLT = req.kauth.grant.access_token.content.groups?.includes('Leitungsteam')
 	const permissions = await userPermissionModel.findAll({where: {uuid: req.kauth.grant.access_token.content.sub}})
 	if (!isLT && req.query.status !== '4') {
 		res.status(403).send()
@@ -85,7 +84,7 @@ export async function createOrUpdate(req, res) {
 		return;
 	}
 	const year = req.params.year || (await SettingModel.findByPk('currentYear')).value
-	const isLT = req.kauth.grant.access_token.content.groups?.includes(year + '_LT')
+	const isLT = req.kauth.grant.access_token.content.groups?.includes('Leitungsteam')
 	const self = req.kauth.grant.access_token.content.sub === req.params.uuid
 	if (!isLT && !self) {
 		res.status(403).send()
@@ -130,11 +129,10 @@ export async function createOrUpdate(req, res) {
 
 export async function additionalInfo(req, res) {
 	const uuid = req.params.uuid || req.kauth.grant.access_token.content.sub
-	const year = req.params.year || (await settingModel.findByPk('currentYear')).value
 	let isLeader = false;
 	await kcAdminClient.users.listGroups({id: uuid}).then((groups) => {
 		groups.forEach((group) => {
-			if (group.name === year + '_LT') {
+			if (group.name === 'Leitungsteam') {
 				isLeader = true;
 				return
 			}

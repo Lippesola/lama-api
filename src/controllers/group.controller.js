@@ -10,8 +10,7 @@ import { findAllParticipators } from './participator.controller.js'
 
 async function isAllowed(req) {
 	const executingUser = req.kauth.grant.access_token.content.sub
-	const year = (await settingModel.findByPk('currentYear')).value
-	const isLT = req.kauth.grant.access_token.content.groups?.includes(year + '_LT')
+	const isLT = req.kauth.grant.access_token.content.groups?.includes('Leitungsteam')
 	const allowed = isLT || (await userPermissionModel.findOne({where: { uuid: executingUser, permission: 'participator'}}))?.allowed
 	return allowed
 }
@@ -92,8 +91,7 @@ export async function update(req, res) {
 		res.status(400).send('bad request')
 		return;
 	}
-	const year = (await settingModel.findByPk('currentYear')).value
-	const isLT = req.kauth.grant.access_token.content.groups?.includes(year + '_LT')
+	const isLT = req.kauth.grant.access_token.content.groups?.includes('Leitungsteam')
 	const group = await groupModel.findByPk(req.params.id)
 	if (group) {
 		if (!isLT) {
@@ -116,8 +114,7 @@ export async function deleteOne(req, res) {
 		res.status(400).send('bad request')
 		return;
 	}
-	const year = (await settingModel.findByPk('currentYear')).value
-	const isLT = req.kauth.grant.access_token.content.groups?.includes(year + '_LT')
+	const isLT = req.kauth.grant.access_token.content.groups?.includes('Leitungsteam')
 	const group = await groupModel.findByPk(req.params.id)
 	if (group) {
 		if (!isLT) {

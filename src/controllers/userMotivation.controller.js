@@ -2,8 +2,7 @@ import userMotivationModel from '../models/userMotivation.model.js'
 import settingModel from '../models/setting.model.js'
 
 export async function findAll(req, res) {
-	const year = req.query.year || (await settingModel.findByPk('currentYear')).value
-	const isLT = req.kauth.grant.access_token.content.groups?.includes(year + '_LT')
+	const isLT = req.kauth.grant.access_token.content.groups?.includes('Leitungsteam')
 	if (!isLT) {
 		res.status(403).send()
 		return;
@@ -23,8 +22,7 @@ export async function findOne(req, res) {
 	}
 	const executingUser = req.kauth.grant.access_token.content.sub
 	const isSelf = executingUser === req.params.uuid
-	const year = (await settingModel.findByPk('currentYear')).value
-	const isLT = req.kauth.grant.access_token.content.groups?.includes(year + '_LT')
+	const isLT = req.kauth.grant.access_token.content.groups?.includes('Leitungsteam')
 	const allowed = isLT || isSelf
 	if (!allowed) {
 		res.status(403).send()
@@ -41,8 +39,7 @@ export async function findOne(req, res) {
 export async function createOrUpdate(req, res) {
 	const executingUser = req.kauth.grant.access_token.content.sub
 	const isSelf = executingUser === req.params.uuid
-	const year = (await settingModel.findByPk('currentYear')).value
-	const isLT = req.kauth.grant.access_token.content.groups?.includes(year + '_LT')
+	const isLT = req.kauth.grant.access_token.content.groups?.includes('Leitungsteam')
 	const allowed = isLT || isSelf
 	if (!allowed) {
 		res.status(403).send()
