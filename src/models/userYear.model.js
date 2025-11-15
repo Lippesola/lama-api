@@ -204,5 +204,8 @@ export default sequelize.define('UserYear', {
         model: 'Users',
         key: 'uuid'
     }
-  }
+  },
+  registeredAt: {
+    type: DataTypes.DATE
+  },
 });

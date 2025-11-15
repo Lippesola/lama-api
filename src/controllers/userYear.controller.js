@@ -49,10 +49,10 @@ export async function findAll(req, res) {
 			})
 		}
 	}
-	delete req.query.userBundle
-	delete req.query.assigneeBundle
-	delete req.query.documentBundle
 	data['where'] = req.query
+	delete data.where.userBundle
+	delete data.where.assigneeBundle
+	delete data.where.documentBundle
 	try {
 		console.log(data);
 		const userYear = await userYearModel.findAll(data)
@@ -91,10 +91,12 @@ export async function createOrUpdate(req, res) {
 		return;
 	}
 	const userYear = await userYearModel.findOne({where: {uuid: req.params.uuid, year: year}})
+	req.body.registeredAt = userYear.registeredAt;
 	var data = req.body
 	if (userYear) {
 		if (userYear.status === 2) {
 			data['status'] = 3;
+			data['registeredAt'] = new Date();
 		}
 		// activate user
 		if (userYear.status !== 4 && req.body.status === 4) {

@@ -75,6 +75,7 @@ import supporterYearRouter from './src/routes/supporterYear.route.js'
 import userRouter from './src/routes/user.route.js'
 import userCriminalRecordRouter from './src/routes/userCriminalRecord.route.js'
 import userMotivationRouter from './src/routes/userMotivation.route.js'
+import userCommentRouter from './src/routes/userComment.route.js'
 import userDocumentRouter from './src/routes/userDocument.route.js'
 import userPermissionRouter from './src/routes/userPermission.route.js'
 import userYearRouter from './src/routes/userYear.route.js'
@@ -95,6 +96,7 @@ import responsibilityModel from './src/models/responsibility.model.js';
 
 import supporterYearModel from './src/models/supporterYear.model.js';
 import supporterDayModel from './src/models/supporterDay.model.js';
+import userCommentModel from './src/models/userComment.model.js';
 import userDocumentModel from './src/models/userDocument.model.js';
 import userPermissionModel from './src/models/userPermission.model.js';
 import userMotivationModel from './src/models/userMotivation.model.js';
@@ -117,6 +119,7 @@ app.use('/user', userRouter);
 app.use('/supporterYear', supporterYearRouter);
 app.use('/userCriminalRecord', userCriminalRecordRouter);
 app.use('/userMotivation', userMotivationRouter);
+app.use('/userComment', userCommentRouter);
 app.use('/userDocument', userDocumentRouter);
 app.use('/userPermission', userPermissionRouter);
 app.use('/userYear', userYearRouter);
@@ -149,6 +152,9 @@ responsibilityModel.hasOne(userModel, {foreignKey: 'uuid'})
 
 supporterYearModel.hasMany(supporterDayModel, {foreignKey: 'uuid'})
 supporterDayModel.hasOne(supporterYearModel, {foreignKey: 'uuid'})
+
+userModel.hasOne(userCommentModel, {foreignKey: 'uuid'})
+userCommentModel.hasOne(userModel, {foreignKey: 'uuid'})
 
 userModel.hasOne(userDocumentModel, {foreignKey: 'uuid'})
 userDocumentModel.hasOne(userModel, {foreignKey: 'uuid'})
