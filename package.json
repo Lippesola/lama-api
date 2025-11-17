@@ -21,7 +21,7 @@
     "html-to-text": "^9.0.5",
     "nodemailer": "^7.0.10",
     "mailgun.js": "^12.0.1",
-    "mariadb": "^3.4.2",
+    "mariadb": "^3.4.5",
     "pdfkit": "^0.17.2",
     "keycloak-connect": "^26.1.1",
     "sequelize": "^6.37.7"
