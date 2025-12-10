@@ -40,7 +40,7 @@ export function getCriminalRecordContent(doc, user) {
     doc.text('Wir bitten um Übermittlung des privaten erweiterten polizeilichen Führungszeugnis an ' + (user.gender === 'm' ? 'den Antragsteller' : 'die Antragstellerin') + '. Da die Mitarbeit ehrenamtlich und ohne Zahlung eines Entgeltes erfolgt, wird hiermit gleichzeitig die Gebührenbefreiung beantragt.', {width: doc.page.width * leftWidth, align: 'justify'}).moveDown();
     doc.text('Mit freundlichen Grüßen,', {width: doc.page.width * leftWidth}).moveDown(0.3);
     doc.text('im Auftrag', {width: doc.page.width * leftWidth}).moveDown(1.5);
-    doc.font('signature').fontSize(12).text('Michell Malolepzy', {width: doc.page.width * leftWidth}).moveDown(0.5);
+    doc.font('signature').fontSize(12).text('Tabea Ostermeier', {width: doc.page.width * leftWidth}).moveDown(0.5);
     doc.font('regular').fontSize(8).text('Dieses Schreiben wurde im Rahmen unserer Online-Mitarbeiteranmeldung maschinell erstellt und ist daher auch mit Faksimile-Unterschrift gültig.', {width: doc.page.width * leftWidth}).moveDown();
 }
 
@@ -88,9 +88,9 @@ export async function getSidebar(doc) {
   doc.font('medium').fillColor(primaryColor).text('Datenschutz', {width: columnWidth}).moveDown(0.1);
   doc.font('light').fillColor('black').text('www.lippesola.de/datenschutz', {width: columnWidth}).moveDown();
 
-  doc.font('medium').fillColor(primaryColor).text('Michell Malolepzy', {width: columnWidth}).moveDown(0.1);
+  doc.font('medium').fillColor(primaryColor).text('Micha Preußer', {width: columnWidth}).moveDown(0.1);
   doc.font('light').fillColor('black').text('Freizeitleitung', {width: columnWidth}).moveDown(0.1);
-  doc.font('light').text('michell.malo@lippesola.de', {width: columnWidth}).moveDown();
+  doc.font('light').text('micha.preusser@lippesola.de', {width: columnWidth}).moveDown();
 
   doc.font('medium').fillColor(primaryColor).text('Tabea Ostermeier', {width: columnWidth}).moveDown(0.1);
   doc.font('light').fillColor('black').text('Freizeitleitung', {width: columnWidth}).moveDown(0.1);
