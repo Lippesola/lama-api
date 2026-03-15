@@ -89,7 +89,7 @@ services:
       POSTGRES_USER: keycloak
       POSTGRES_PASSWORD: keycloak
     volumes:
-      - ./.docker-data/keycloak-db:/var/lib/postgresql/data:Z
+      - ./.docker-data/keycloak-db:/var/lib/postgresql:Z
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U keycloak"]
       interval: 10s
