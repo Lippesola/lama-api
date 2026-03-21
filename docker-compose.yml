@@ -1,0 +1,98 @@
+services:
+  lama-api:
+    build: .
+    ports:
+      - "8080:8080"
+    environment:
+      DB_HOST: db
+      DB_USER: lama
+      DB_PASS: lama
+      DB_NAME: lama
+      DB_VENDOR: mariadb
+      KEYCLOAK_URL: http://keycloak:8080
+      KEYCLOAK_REALM: lama
+      KEYCLOAK_CLIENTID: lama
+      KEYCLOAK_ADMIN_USER: admin
+      KEYCLOAK_ADMIN_PASS: admin
+      KEYCLOAK_ADMIN_CLIENTID: admin-cli
+      LAMA_APP_URL: http://localhost:9000
+      # SMTP_HOST:
+      # SMTP_PORT: 587
+      # SMTP_USER:
+      # SMTP_PASS:
+      # SMTP_FROM:
+      # SMTP_SECURE: "false"
+      # MAILGUN_API_USER: api
+      # MAILGUN_API_KEY:
+      # PRETIX_API_URL:
+      # PRETIX_API_TOKEN:
+      # PRETIX_ORGANIZER:
+      # PRETIX_EVENT:
+    volumes:
+      - ./.docker-data/uploads:/lama-api/uploads:Z
+    depends_on:
+      db:
+        condition: service_healthy
+      keycloak:
+        condition: service_healthy
+    restart: unless-stopped
+
+  db:
+    image: mariadb:11.8
+    environment:
+      MARIADB_ROOT_PASSWORD: root
+      MARIADB_DATABASE: lama
+      MARIADB_USER: lama
+      MARIADB_PASSWORD: lama
+    volumes:
+      - ./.docker-data/lama-db:/var/lib/mysql:Z
+    healthcheck:
+      test: ["CMD", "healthcheck.sh", "--connect", "--innodb_initialized"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
+
+  keycloak:
+    image: quay.io/keycloak/keycloak:26.5
+    command: start-dev --import-realm
+    environment:
+      KC_DB: postgres
+      KC_DB_URL_HOST: keycloak-db
+      KC_DB_URL_DATABASE: keycloak
+      KC_DB_USERNAME: keycloak
+      KC_DB_PASSWORD: keycloak
+      KC_HOSTNAME_STRICT: "false"
+      KC_HTTP_ENABLED: "true"
+      KC_HEALTH_ENABLED: "true"
+      KEYCLOAK_ADMIN: admin
+      KEYCLOAK_ADMIN_PASSWORD: admin
+    ports:
+      - "8180:8080"
+    volumes:
+      - ./docker/keycloak:/opt/keycloak/data/import:Z
+    depends_on:
+      keycloak-db:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "exec 3<>/dev/tcp/localhost/9000 && echo -e 'GET /health/ready HTTP/1.1\\r\\nHost: localhost\\r\\nConnection: close\\r\\n\\r\\n' >&3 && cat <&3 | grep -q '200 OK'"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 30s
+    restart: unless-stopped
+
+  keycloak-db:
+    image: postgres:18-alpine
+    environment:
+      POSTGRES_DB: keycloak
+      POSTGRES_USER: keycloak
+      POSTGRES_PASSWORD: keycloak
+    volumes:
+      - ./.docker-data/keycloak-db:/var/lib/postgresql:Z
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U keycloak"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
