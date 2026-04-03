@@ -1,11 +1,11 @@
-import { Router } from 'express';
-import keycloak from '../config/keycloak.js';
-import { findAll, findOne, update } from '../controllers/motivation.controller.js'
+import keycloak from '../config/keycloak.js'
+import controller from '../controllers/motivation.controller.js'
+import createRouter from '../utils/createRouter.js'
 
-var router = new Router();
-
-    router.get('/', keycloak.protect(), findAll);
-    router.get('/:id', keycloak.protect(), findOne);
-    router.post('/', keycloak.protect(), update);
-
-export default router
+export default createRouter({
+	controller,
+	methods: ['findAll', 'findOne'],
+	extraRoutes: [
+		{ method: 'post', path: '/', handler: controller.replaceAll() },
+	],
+})

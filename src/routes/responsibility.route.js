@@ -1,12 +1,12 @@
-import { Router } from 'express';
-import keycloak from '../config/keycloak.js';
-import { findAll, findOne, create, update } from '../controllers/responsibility.controller.js'
+import keycloak from '../config/keycloak.js'
+import responsibilityModel from '../models/responsibility.model.js'
+import BaseController from '../controllers/base.controller.js'
+import createRouter from '../utils/createRouter.js'
 
-var router = new Router();
-  
-	router.get('/', keycloak.protect(), findAll);
-	router.get('/:id', keycloak.protect(), findOne);
-	router.post('/', keycloak.protect(['admin']), create);
-	router.post('/:id', keycloak.protect(['admin']), update);
+const controller = new BaseController({ model: responsibilityModel, paramKey: 'id' })
 
-export default router
+export default createRouter({
+	controller,
+	methods: ['findAll', 'findOne', 'create', 'update'],
+	auth: { write: keycloak.protect(['admin']) },
+})

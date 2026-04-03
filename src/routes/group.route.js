@@ -1,13 +1,21 @@
-import { Router } from "express";
-import keycloak from "../config/keycloak.js";
-import { findAll, findOne, create, update, deleteOne, autoSort } from "../controllers/group.controller.js";
+import keycloak from '../config/keycloak.js'
+import controller from '../controllers/group.controller.js'
+import createRouter from '../utils/createRouter.js'
+import { requireAuth, isLTOrHasPermission } from '../middleware/auth.js'
 
-var router = new Router();
-router.get('/', keycloak.protect(), findAll);
-router.get('/:id', keycloak.protect(), findOne);
-router.post('/', keycloak.protect(), create);
-router.post('/:id', keycloak.protect(), update);
-router.delete('/:id', keycloak.protect(), deleteOne);
-router.post('/autoSort/:year/:week', keycloak.protect(), autoSort);
+const allowedMw = requireAuth(req => isLTOrHasPermission(req, 'participator'))
 
-export default router
+export default createRouter({
+	controller,
+	methods: ['findAll', 'findOne', 'create', 'update', 'deleteOne'],
+	middleware: {
+		findAll: [allowedMw],
+		findOne: [allowedMw],
+		create: [allowedMw],
+		update: [allowedMw],
+		deleteOne: [allowedMw],
+	},
+	extraRoutes: [
+		{ method: 'post', path: '/autoSort/:year/:week', handler: controller.autoSort(), middleware: [allowedMw] },
+	],
+})

@@ -1,11 +1,12 @@
-import { Router } from 'express';
-import keycloak from '../config/keycloak.js';
-import { findAll, findOne, createOrUpdate } from '../controllers/participatorQuestionCategory.controller.js'
+import keycloak from '../config/keycloak.js'
+import participatorQuestionCategoryModel from '../models/participatorQuestionCategory.model.js'
+import BaseController from '../controllers/base.controller.js'
+import createRouter from '../utils/createRouter.js'
 
-var router = new Router();
-  
-	router.get('/', keycloak.protect(), findAll);
-	router.get('/:id', keycloak.protect(), findOne);
-	router.post('/:id', keycloak.protect(['admin']), createOrUpdate);
+const controller = new BaseController({ model: participatorQuestionCategoryModel, paramKey: 'id' })
 
-export default router
+export default createRouter({
+	controller,
+	methods: ['findAll', 'findOne', 'createOrUpdate'],
+	auth: { write: keycloak.protect(['admin']) },
+})
