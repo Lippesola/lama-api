@@ -5,6 +5,7 @@
   "main": "index.js",
   "type": "module",
   "scripts": {
+    "start": "node index.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [],
@@ -14,16 +15,16 @@
     "@keycloak/keycloak-admin-client": "^26.4.7",
     "body-parser": "^2.2.0",
     "cors": "^2.8.5",
+    "dotenv": "^17.4.2",
     "express": "^5.2.0",
-    "dotenv": "^17.2.3",
     "express-fileupload": "^1.5.2",
     "express-session": "^1.18.2",
     "html-to-text": "^9.0.5",
-    "nodemailer": "^7.0.11",
+    "keycloak-connect": "^26.1.1",
     "mailgun.js": "^12.0.1",
     "mariadb": "^3.4.5",
+    "nodemailer": "^8.0.5",
     "pdfkit": "^0.17.2",
-    "keycloak-connect": "^26.1.1",
     "sequelize": "^6.37.8"
   }
 }
