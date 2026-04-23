@@ -1,3 +1,4 @@
+import 'dotenv/config'
 import express from 'express'
 import fileupload from 'express-fileupload'
 import cors from 'cors'

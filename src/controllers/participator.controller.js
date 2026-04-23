@@ -6,7 +6,11 @@ import settingModel from '../models/setting.model.js';
 import { sendMailToParents } from './mail.controller.js';
 import preferenceModel from '../models/preference.model.js';
 
-const questionMapper = await getPretixMapper();
+let questionMapperPromise = null;
+function getQuestionMapper() {
+	if (!questionMapperPromise) questionMapperPromise = getPretixMapper();
+	return questionMapperPromise;
+}
 async function isAllowed(req) {
 	const executingUser = req.kauth.grant.access_token.content.sub
 	const isLT = req.kauth.grant.access_token.content.groups?.includes('Leitungsteam')
@@ -128,7 +132,7 @@ function mapOrderInfo(order) {
 	};
 }
 
-function mapPositionInfo(position) {
+function mapPositionInfo(position, questionMapper) {
 	let answers = {};
 	position.answers.map((answer) => {
 		answers[questionMapper[answer.question_identifier] || answer.question_identifier] = answer.answer;
@@ -137,6 +141,7 @@ function mapPositionInfo(position) {
 }
 
 async function getOneParticipatorAnswers(orderId, positionId) {
+	const questionMapper = await getQuestionMapper();
 	const order = await fetch(pretix.apiUrl + '/organizers/' + pretix.organizer + '/events/' + pretix.event + '/orders/' + orderId, {
 		method: 'GET',
 		headers: {
@@ -155,12 +160,13 @@ async function getOneParticipatorAnswers(orderId, positionId) {
 	let position = order.positions[positionId - 1];
 	return {
 		...mapOrderInfo(order),
-		...mapPositionInfo(position),
+		...mapPositionInfo(position, questionMapper),
 		...{week: (position.item == pretix.teensWeek) ? 'teens' : (position.item == pretix.kidsWeek) ? 'kids' : '',}
 	};
 }
 
 async function getAllParticipatorsAnswers(page = 1, summarized = {}) {
+	const questionMapper = await getQuestionMapper();
 	const orders = await fetch(pretix.apiUrl + '/organizers/' + pretix.organizer + '/events/' + pretix.event + '/orders/?page=' + page, {
 		method: 'GET',
 		headers: {
@@ -183,7 +189,7 @@ async function getAllParticipatorsAnswers(page = 1, summarized = {}) {
 			if (position.answers && position.answers.length > 0) {
 				participators[position.id] = {
 					...mapOrderInfo(order),
-					...mapPositionInfo(position),
+					...mapPositionInfo(position, questionMapper),
 					...{
 						orderId: order.code,
 						positionId: position.positionid,

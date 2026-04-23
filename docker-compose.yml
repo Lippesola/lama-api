@@ -1,5 +1,6 @@
 services:
   lama-api:
+    profiles: ["full"]
     build: .
     ports:
       - "8080:8080"
@@ -44,6 +45,8 @@ services:
       MARIADB_DATABASE: lama
       MARIADB_USER: lama
       MARIADB_PASSWORD: lama
+    ports:
+      - "3306:3306"
     volumes:
       - ./.docker-data/lama-db:/var/lib/mysql:Z
     healthcheck:
@@ -65,8 +68,10 @@ services:
       KC_HOSTNAME_STRICT: "false"
       KC_HTTP_ENABLED: "true"
       KC_HEALTH_ENABLED: "true"
+      KC_PROXY: "edge"
       KEYCLOAK_ADMIN: admin
       KEYCLOAK_ADMIN_PASSWORD: admin
+      KC_PROXY_HEADERS: "xforwarded"
     ports:
       - "8180:8080"
     volumes:
