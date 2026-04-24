@@ -80,7 +80,7 @@ class UserYearController extends BaseController {
 				return;
 			}
 			const year = req.params.year || (await settingModel.findByPk('currentYear')).value
-			if (selfOrLT(req)) {
+			if (!selfOrLT(req)) {
 				res.status(403).send()
 				return;
 			}

@@ -10,7 +10,7 @@ async function initSequelize() {
 	try {
 		await sequelize.authenticate();
 		console.log('Connection has been established successfully.');
-		await sequelize.sync({ alter: true });
+		await sequelize.sync();
 		console.log('All models were synchronized successfully.');
 	  
 	  } catch (error) {
@@ -106,6 +106,11 @@ import groupModel from './src/models/group.model.js';
 import groupUserModel from './src/models/groupUser.model.js';
 import preferenceModel from './src/models/preference.model.js';
 import participatorModel from './src/models/participator.model.js';
+import participatorQuestionModel from './src/models/participatorQuestion.model.js';
+import participatorQuestionCategoryModel from './src/models/participatorQuestionCategory.model.js';
+import threadModel from './src/models/thread.model.js';
+import postModel from './src/models/post.model.js';
+import userPostModel from './src/models/userPost.model.js';
 
 app.use('/avatar', avatarRouter);
 app.use('/event', eventRouter);
@@ -141,39 +146,53 @@ app.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}.`);
 });
 
-await initSequelize()
-
-
 userYearModel.belongsTo(userModel, {as: 'UserModel', foreignKey: 'uuid'})
 userModel.hasMany(userYearModel, {foreignKey: 'uuid'})
 userYearModel.belongsTo(userModel, {as: 'AssigneeModel', foreignKey: 'assignee'})
 
 userModel.hasMany(responsibilityModel, {foreignKey: 'uuid'})
-responsibilityModel.hasOne(userModel, {foreignKey: 'uuid'})
+responsibilityModel.belongsTo(userModel, {foreignKey: 'uuid'})
 
 supporterYearModel.hasMany(supporterDayModel, {foreignKey: 'uuid'})
-supporterDayModel.hasOne(supporterYearModel, {foreignKey: 'uuid'})
+supporterDayModel.belongsTo(supporterYearModel, {foreignKey: 'uuid'})
 
 userModel.hasOne(userCommentModel, {foreignKey: 'uuid'})
-userCommentModel.hasOne(userModel, {foreignKey: 'uuid'})
+userCommentModel.belongsTo(userModel, {foreignKey: 'uuid'})
 
 userModel.hasOne(userDocumentModel, {foreignKey: 'uuid'})
-userDocumentModel.hasOne(userModel, {foreignKey: 'uuid'})
+userDocumentModel.belongsTo(userModel, {foreignKey: 'uuid'})
 
 userModel.hasOne(userMotivationModel, {foreignKey: 'uuid'})
-userMotivationModel.hasOne(userModel, {foreignKey: 'uuid'})
+userMotivationModel.belongsTo(userModel, {foreignKey: 'uuid'})
 
 userModel.hasMany(userPermissionModel, {foreignKey: 'uuid'})
-userPermissionModel.hasOne(userModel, {foreignKey: 'uuid'})
+userPermissionModel.belongsTo(userModel, {foreignKey: 'uuid'})
 
 groupModel.hasMany(groupUserModel, {foreignKey: 'groupId'})
-groupUserModel.hasOne(groupModel, {foreignKey: 'id'})
+groupUserModel.belongsTo(groupModel, {foreignKey: 'groupId'})
 
 userModel.hasMany(groupUserModel, {foreignKey: 'uuid', sourceKey: 'uuid'})
-groupUserModel.hasOne(userModel, {foreignKey: 'uuid', sourceKey: 'uuid'})
+groupUserModel.belongsTo(userModel, {foreignKey: 'uuid', targetKey: 'uuid'})
 
 preferenceModel.hasMany(participatorModel, {foreignKey: 'preferenceId'})
-participatorModel.hasOne(preferenceModel, {foreignKey: 'id'})
+participatorModel.belongsTo(preferenceModel, {foreignKey: 'preferenceId'})
 
 groupModel.hasMany(preferenceModel, {foreignKey: 'groupId'})
-preferenceModel.hasOne(groupModel, {foreignKey: 'id'})
+preferenceModel.belongsTo(groupModel, {foreignKey: 'groupId'})
+
+threadModel.hasMany(postModel, {foreignKey: 'threadId', onDelete: 'CASCADE'})
+postModel.belongsTo(threadModel, {foreignKey: 'threadId'})
+
+userModel.hasMany(postModel, {foreignKey: 'createdBy', sourceKey: 'uuid', onDelete: 'CASCADE'})
+postModel.belongsTo(userModel, {foreignKey: 'createdBy', targetKey: 'uuid'})
+
+userModel.hasMany(userPostModel, {foreignKey: 'uuid', sourceKey: 'uuid', onDelete: 'CASCADE'})
+userPostModel.belongsTo(userModel, {foreignKey: 'uuid', targetKey: 'uuid'})
+
+postModel.hasMany(userPostModel, {foreignKey: 'postId', onDelete: 'CASCADE'})
+userPostModel.belongsTo(postModel, {foreignKey: 'postId'})
+
+participatorQuestionCategoryModel.hasMany(participatorQuestionModel, {foreignKey: 'category'})
+participatorQuestionModel.belongsTo(participatorQuestionCategoryModel, {foreignKey: 'category'})
+
+await initSequelize()
