@@ -59,8 +59,13 @@ export default class BaseController {
 
 	create() {
 		return async (req, res) => {
-			const record = await this.model.create(req.body)
-			res.status(200).send(record)
+			try {
+				const record = await this.model.create(req.body)
+				res.status(200).send(record)
+			} catch (e) {
+				console.log(e)
+				res.status(400).send()
+			}
 		}
 	}
 
@@ -69,7 +74,7 @@ export default class BaseController {
 			if (!this._validateParams(req, res)) return
 			const record = await this._findRecord(req)
 			if (record) {
-				await this.model.update(req.body, { where: this._getWhereClause(req) })
+				await record.update(req.body)
 				res.status(200).send(record)
 			} else {
 				res.status(404).send('not found')
@@ -82,7 +87,7 @@ export default class BaseController {
 			if (!this._validateParams(req, res)) return
 			const record = await this._findRecord(req)
 			if (record) {
-				await this.model.update(req.body, { where: this._getWhereClause(req) })
+				await record.update(req.body)
 				res.status(200).send(record)
 			} else {
 				const data = { ...req.body, ...this._getWhereClause(req) }

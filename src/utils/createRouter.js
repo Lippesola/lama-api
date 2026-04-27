@@ -34,15 +34,15 @@ export default function createRouter({ controller, methods = [], paramPath, auth
 		deleteOne:      () => router.delete(idPath, ...buildHandlers('deleteOne', controller.deleteOne())),
 	}
 
-	for (const method of methods) {
-		if (routeMap[method]) routeMap[method]()
-	}
-
 	for (const route of extraRoutes) {
 		const a = route.auth !== undefined ? route.auth : writeAuth
 		const mw = route.middleware || []
 		const handlers = a ? [a, ...mw, route.handler] : [...mw, route.handler]
 		router[route.method](route.path, ...handlers)
+	}
+
+	for (const method of methods) {
+		if (routeMap[method]) routeMap[method]()
 	}
 
 	return router
