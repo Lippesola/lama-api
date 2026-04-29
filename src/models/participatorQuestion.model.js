@@ -17,10 +17,6 @@ export default sequelize.define('ParticipatorQuestion', {
   },
   category: {
     type: DataTypes.STRING,
-    allowNull: false,
-    references: {
-        model: 'ParticipatorQuestionCategories',
-        key: 'id'
-    }
+    allowNull: false
   },
 });

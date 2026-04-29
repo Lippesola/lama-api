@@ -1,75 +1,59 @@
 import threadModel from '../models/thread.model.js'
-import settingModel from '../models/setting.model.js'
 import postModel from '../models/post.model.js'
-import userPostModel from '../models/userPost.model.js'
+import BaseController from './base.controller.js'
+import { isLT, getTokenContent } from '../middleware/auth.js'
 
-export async function findAll(req, res) {
-	try {
-		const thread = await threadModel.findAll({where: req.query})
-		res.status(200).send(thread)
-	} catch(e) {
-		res.status(400).send()
+class ThreadController extends BaseController {
+	constructor() {
+		super({ model: threadModel, paramKey: 'id' })
 	}
-}
 
-export async function findOne(req, res) {
-	if (!req.params || !req.params.id ) {
-		res.status(400).send('bad request')
-		return;
-	}
-	const thread = await threadModel.findByPk(req.params.id)
-	if (thread) {
-		res.status(200).send(thread)
-	} else {
-		res.status(404).send('not found')
-	}
-}
-
-export async function create(req, res) {
-	if (!req.body || !req.body.title) {
-		res.status(400).send('bad request')
-		return;
-	}
-	const thread = await threadModel.create(req.body)
-	res.status(200).send(thread)
-}
-
-export async function update(req, res) {
-	if (!req.params || !req.params.id) {
-		res.status(400).send('bad request')
-		return;
-	}
-	const isLT = req.kauth.grant.access_token.content.groups?.includes('Leitungsteam')
-	const thread = await threadModel.findByPk(req.params.id)
-	const posts = await postModel.findAll({where: {threadId: req.params.id}})
-	if (thread) {
-		if ((req.kauth.grant.access_token.content.sub !== posts[0]['createdBy']) && !isLT) {
-			res.status(403).send()
-			return;
+	create() {
+		return async (req, res) => {
+			if (!req.body?.title) {
+				res.status(400).send('bad request')
+				return
+			}
+			const thread = await threadModel.create(req.body)
+			res.status(200).send(thread)
 		}
-		threadModel.update(req.body, {where: {id: req.params.id}});
-		res.status(200).send(thread)
-	} else {
-		res.status(404).send('not found')
+	}
+
+	update() {
+		return async (req, res) => {
+			if (!this._validateParams(req, res)) return
+			const thread = await this._findRecord(req)
+			if (!thread) {
+				res.status(404).send('not found')
+				return
+			}
+			const posts = await postModel.findAll({ where: { threadId: req.params.id } })
+			if (getTokenContent(req).sub !== posts[0]?.createdBy && !isLT(req)) {
+				res.status(403).send()
+				return
+			}
+			await this.model.update(req.body, { where: { id: req.params.id } })
+			res.status(200).send(thread)
+		}
+	}
+
+	deleteOne() {
+		return async (req, res) => {
+			if (!this._validateParams(req, res)) return
+			const thread = await this._findRecord(req)
+			if (!thread) {
+				res.status(404).send('not found')
+				return
+			}
+			const posts = await postModel.findAll({ where: { threadId: req.params.id } })
+			if (getTokenContent(req).sub !== posts[0]?.createdBy && !isLT(req)) {
+				res.status(403).send()
+				return
+			}
+			await this.model.destroy({ where: { id: req.params.id } })
+			res.status(200).send(thread)
+		}
 	}
 }
 
-export async function deleteOne(req, res) {
-	if (!req.params || !req.params.id) {
-		res.status(400).send('bad request')
-		return;
-	}
-	const isLT = req.kauth.grant.access_token.content.groups?.includes('Leitungsteam')
-	const thread = await threadModel.findByPk(req.params.id)
-	if (thread) {
-		const posts = await postModel.findAll({where: {threadId: req.params.id}})
-		if ((req.kauth.grant.access_token.content.sub !== posts[0]['createdBy']) && !isLT) {
-			res.status(403).send()
-			return;
-		}
-		threadModel.destroy({where: {id: req.params.id}});
-		res.status(200).send(thread)
-	} else {
-		res.status(404).send('not found')
-	}
-}
+export default new ThreadController()

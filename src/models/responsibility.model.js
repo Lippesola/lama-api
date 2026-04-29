@@ -16,10 +16,6 @@ export default sequelize.define('Responsibility', {
     }
   },
   uuid: {
-    type: DataTypes.UUID,
-    references: {
-        model: 'Users',
-        key: 'uuid'
-    }
+    type: DataTypes.UUID
   },
 });

@@ -1,11 +1,8 @@
-import { Router } from 'express';
-import keycloak from '../config/keycloak.js';
-import { findAll, findOne, createOrUpdate } from '../controllers/participator.controller.js'
+import keycloak from '../config/keycloak.js'
+import controller from '../controllers/participator.controller.js'
+import createRouter from '../utils/createRouter.js'
 
-var router = new Router();
-  
-	router.get('/', keycloak.protect(), findAll);
-	router.get('/:orderId/:positionId', keycloak.protect(), findOne);
-	router.post('/:orderId/:positionId', keycloak.protect(), createOrUpdate);
-
-export default router
+export default createRouter({
+	controller,
+	methods: ['findAll', 'findOne', 'createOrUpdate'],
+})

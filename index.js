@@ -3,6 +3,7 @@ import express from 'express'
 import fileupload from 'express-fileupload'
 import cors from 'cors'
 import sequelize from './src/models/db.model.js';
+import { ValidationError, UniqueConstraintError } from 'sequelize';
 
 const app = express();
 
@@ -10,7 +11,7 @@ async function initSequelize() {
 	try {
 		await sequelize.authenticate();
 		console.log('Connection has been established successfully.');
-		await sequelize.sync({ alter: true });
+		await sequelize.sync();
 		console.log('All models were synchronized successfully.');
 	  
 	  } catch (error) {
@@ -45,19 +46,19 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
 // unprotected routes
-import { registration } from './src/controllers/registration.controller.js';
-import { findAll as getAllEvents } from './src/controllers/event.controller.js';
-import { findAll as getAllSettings } from './src/controllers/setting.controller.js';
-import { create as createSupporterYear } from './src/controllers/supporterYear.controller.js';
-import { findOne, create } from './src/controllers/mailingListToken.controller.js';
+import registrationController from './src/controllers/registration.controller.js';
+import { controller as eventController } from './src/routes/event.route.js';
+import { controller as settingController } from './src/routes/setting.route.js';
+import supporterYearController from './src/controllers/supporterYear.controller.js';
+import mailingListTokenController from './src/controllers/mailingListToken.controller.js';
 
 app.get("/", (req, res) => {res.json({ message: "up" });});
-app.post('/registration', registration)
-app.get('/event', getAllEvents);
-app.get('/setting', getAllSettings);
-app.post('/supporterYear', createSupporterYear)
-app.get('/mailingListToken/:token', findOne)
-app.post('/mailingListToken', create)
+app.post('/registration', registrationController.registration())
+app.get('/event', eventController.findAll());
+app.get('/setting', settingController.findAll());
+app.post('/supporterYear', supporterYearController.create())
+app.get('/mailingListToken/:token', mailingListTokenController.findOne())
+app.post('/mailingListToken', mailingListTokenController.create())
 
 // protected routes
 import keycloak from './src/config/keycloak.js'
@@ -106,6 +107,11 @@ import groupModel from './src/models/group.model.js';
 import groupUserModel from './src/models/groupUser.model.js';
 import preferenceModel from './src/models/preference.model.js';
 import participatorModel from './src/models/participator.model.js';
+import participatorQuestionModel from './src/models/participatorQuestion.model.js';
+import participatorQuestionCategoryModel from './src/models/participatorQuestionCategory.model.js';
+import threadModel from './src/models/thread.model.js';
+import postModel from './src/models/post.model.js';
+import userPostModel from './src/models/userPost.model.js';
 
 app.use('/avatar', avatarRouter);
 app.use('/event', eventRouter);
@@ -135,45 +141,78 @@ app.use('/thread', threadRouter);
 app.use('/post', postRouter);
 app.use('/userPost', userPostRouter);
 
+app.use((err, req, res, next) => {
+	if (res.headersSent) return next(err)
+	if (err instanceof UniqueConstraintError) {
+		return res.status(409).send(err.errors.map(e => e.path))
+	}
+	if (err instanceof ValidationError) {
+		return res.status(400).send(err.errors.map(e => ({ path: e.path, validator: e.validatorKey })))
+	}
+	console.error(err)
+	res.status(500).send()
+})
+
+process.on('unhandledRejection', (reason) => {
+	console.error('Unhandled rejection:', reason)
+})
+process.on('uncaughtException', (err) => {
+	console.error('Uncaught exception:', err)
+})
+
 // set port, listen for requests
 const PORT = process.env.PORT || 8080;
 app.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}.`);
 });
 
-await initSequelize()
-
-
 userYearModel.belongsTo(userModel, {as: 'UserModel', foreignKey: 'uuid'})
 userModel.hasMany(userYearModel, {foreignKey: 'uuid'})
 userYearModel.belongsTo(userModel, {as: 'AssigneeModel', foreignKey: 'assignee'})
 
 userModel.hasMany(responsibilityModel, {foreignKey: 'uuid'})
-responsibilityModel.hasOne(userModel, {foreignKey: 'uuid'})
+responsibilityModel.belongsTo(userModel, {foreignKey: 'uuid'})
 
 supporterYearModel.hasMany(supporterDayModel, {foreignKey: 'uuid'})
-supporterDayModel.hasOne(supporterYearModel, {foreignKey: 'uuid'})
+supporterDayModel.belongsTo(supporterYearModel, {foreignKey: 'uuid'})
 
 userModel.hasOne(userCommentModel, {foreignKey: 'uuid'})
-userCommentModel.hasOne(userModel, {foreignKey: 'uuid'})
+userCommentModel.belongsTo(userModel, {foreignKey: 'uuid'})
 
 userModel.hasOne(userDocumentModel, {foreignKey: 'uuid'})
-userDocumentModel.hasOne(userModel, {foreignKey: 'uuid'})
+userDocumentModel.belongsTo(userModel, {foreignKey: 'uuid'})
 
 userModel.hasOne(userMotivationModel, {foreignKey: 'uuid'})
-userMotivationModel.hasOne(userModel, {foreignKey: 'uuid'})
+userMotivationModel.belongsTo(userModel, {foreignKey: 'uuid'})
 
 userModel.hasMany(userPermissionModel, {foreignKey: 'uuid'})
-userPermissionModel.hasOne(userModel, {foreignKey: 'uuid'})
+userPermissionModel.belongsTo(userModel, {foreignKey: 'uuid'})
 
 groupModel.hasMany(groupUserModel, {foreignKey: 'groupId'})
-groupUserModel.hasOne(groupModel, {foreignKey: 'id'})
+groupUserModel.belongsTo(groupModel, {foreignKey: 'groupId'})
 
 userModel.hasMany(groupUserModel, {foreignKey: 'uuid', sourceKey: 'uuid'})
-groupUserModel.hasOne(userModel, {foreignKey: 'uuid', sourceKey: 'uuid'})
+groupUserModel.belongsTo(userModel, {foreignKey: 'uuid', targetKey: 'uuid'})
 
 preferenceModel.hasMany(participatorModel, {foreignKey: 'preferenceId'})
-participatorModel.hasOne(preferenceModel, {foreignKey: 'id'})
+participatorModel.belongsTo(preferenceModel, {foreignKey: 'preferenceId'})
 
 groupModel.hasMany(preferenceModel, {foreignKey: 'groupId'})
-preferenceModel.hasOne(groupModel, {foreignKey: 'id'})
+preferenceModel.belongsTo(groupModel, {foreignKey: 'groupId'})
+
+threadModel.hasMany(postModel, {foreignKey: 'threadId', onDelete: 'CASCADE'})
+postModel.belongsTo(threadModel, {foreignKey: 'threadId'})
+
+userModel.hasMany(postModel, {foreignKey: 'createdBy', sourceKey: 'uuid', onDelete: 'CASCADE'})
+postModel.belongsTo(userModel, {foreignKey: 'createdBy', targetKey: 'uuid'})
+
+userModel.hasMany(userPostModel, {foreignKey: 'uuid', sourceKey: 'uuid', onDelete: 'CASCADE'})
+userPostModel.belongsTo(userModel, {foreignKey: 'uuid', targetKey: 'uuid'})
+
+postModel.hasMany(userPostModel, {foreignKey: 'postId', onDelete: 'CASCADE'})
+userPostModel.belongsTo(postModel, {foreignKey: 'postId'})
+
+participatorQuestionCategoryModel.hasMany(participatorQuestionModel, {foreignKey: 'category'})
+participatorQuestionModel.belongsTo(participatorQuestionCategoryModel, {foreignKey: 'category'})
+
+await initSequelize()

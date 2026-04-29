@@ -8,11 +8,6 @@ export default sequelize.define('Preference', {
     autoIncrement: true
   },
   groupId: {
-    type: DataTypes.INTEGER,
-    primaryKey: true,
-    references: {
-        model: 'Groups',
-        key: 'id'
-    }
+    type: DataTypes.INTEGER
   }
 });

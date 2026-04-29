@@ -1,12 +1,14 @@
-import { Router } from 'express';
-import keycloak from '../config/keycloak.js';
-import { findAll, findOne, createOrUpdate, sendMail } from '../controllers/mail.controller.js'
+import keycloak from '../config/keycloak.js'
+import controller from '../controllers/mail.controller.js'
+import createRouter from '../utils/createRouter.js'
 
-var router = new Router();
-  
-	router.get('/', keycloak.protect(['admin']), findAll);
-	router.get('/:key', keycloak.protect(['admin']), findOne);
-	router.post('/sendMail', keycloak.protect(), sendMail);
-	router.post('/:key', keycloak.protect(['admin']), createOrUpdate);
-
-export default router
+export default createRouter({
+	controller,
+	methods: ['findAll', 'findOne'],
+	auth: { read: keycloak.protect(['admin']) },
+	// sendMail muss vor createOrUpdate (POST /:key) registriert werden
+	extraRoutes: [
+		{ method: 'post', path: '/sendMail', handler: controller.sendMail(), auth: keycloak.protect() },
+		{ method: 'post', path: '/:key', handler: controller.createOrUpdate(), auth: keycloak.protect(['admin']) },
+	],
+})

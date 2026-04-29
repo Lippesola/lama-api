@@ -1,200 +1,152 @@
 import groupModel from '../models/group.model.js'
-import userModel from '../models/user.model.js'
 import groupUserModel from '../models/groupUser.model.js'
 import preferenceModel from '../models/preference.model.js'
 import participatorModel from '../models/participator.model.js'
-import userPermissionModel from '../models/userPermission.model.js';
 import settingModel from '../models/setting.model.js'
 import userYearModel from '../models/userYear.model.js'
+import userModel from '../models/user.model.js'
+import BaseController from './base.controller.js'
+import { isLT } from '../middleware/auth.js'
 import { findAllParticipators } from './participator.controller.js'
 
-async function isAllowed(req) {
-	const executingUser = req.kauth.grant.access_token.content.sub
-	const isLT = req.kauth.grant.access_token.content.groups?.includes('Leitungsteam')
-	const allowed = isLT || (await userPermissionModel.findOne({where: { uuid: executingUser, permission: 'participator'}}))?.allowed
-	return allowed
-}
+class GroupController extends BaseController {
+	constructor() {
+		super({ model: groupModel, paramKey: 'id' })
+	}
 
-export async function findAll(req, res) {
-	if (res && !await isAllowed(req)) {
-		res.status(403).send('Not allowed');
-		return;
+	findAll() {
+		return async (req, res) => {
+			let data = { include: [] }
+			data.where = req.query
+			if (typeof data.where.participatorBundle !== 'undefined') {
+				delete data.where.participatorBundle
+				data.subQuery = false
+				data.include.push({
+					model: preferenceModel,
+					include: [{ model: participatorModel }]
+				})
+			}
+			if (typeof data.where.groupUserBundle !== 'undefined') {
+				delete data.where.groupUserBundle
+				data.include.push({ model: groupUserModel })
+			}
+			try {
+				const group = await groupModel.findAll(data)
+				res.status(200).send(group)
+			} catch (e) {
+				console.log(e)
+				res.status(400).send()
+			}
+		}
 	}
-	let data = {}
-	data.include = [];
-	if (typeof req.query.participatorBundle !== 'undefined') {
-		delete req.query.participatorBundle
-		data.subQuery = false
-		data.include.push({
-			model: preferenceModel,
-			include: [{model: participatorModel}]
-		})
+
+	create() {
+		return async (req, res) => {
+			if (!req.body?.year || !req.body?.week) {
+				console.log(req.body)
+				res.status(400).send('bad request')
+				return
+			}
+			const data = { ...req.body }
+			if (!data.groupNumber) data.groupNumber = null
+			await groupModel.create(data)
+			res.status(200).send()
+		}
 	}
-	if (typeof req.query.groupUserBundle !== 'undefined')
-		{
-			delete req.query.groupUserBundle
-			data.include.push({
-				model: groupUserModel
+
+	update() {
+		return async (req, res) => {
+			if (!this._validateParams(req, res)) return
+			const group = await this._findRecord(req)
+			if (!group) {
+				res.status(404).send('not found')
+				return
+			}
+			if (!isLT(req)) {
+				res.status(403).send()
+				return
+			}
+			await this.model.update(req.body, { where: { id: req.params.id } })
+			res.status(200).send(group)
+		}
+	}
+
+	deleteOne() {
+		return async (req, res) => {
+			if (!this._validateParams(req, res)) return
+			const group = await this._findRecord(req)
+			if (!group) {
+				res.status(404).send('not found')
+				return
+			}
+			if (!isLT(req)) {
+				res.status(403).send()
+				return
+			}
+			await this.model.destroy({ where: { id: req.params.id } })
+			res.status(200).send(group)
+		}
+	}
+
+	autoSort() {
+		return async (req, res) => {
+			if (!req.params?.year || !req.params?.week) {
+				res.status(400).send('bad request')
+				return
+			}
+			const weekString = req.params.week === 1 ? 'teens' : req.params.week === 2 ? 'kids' : req.params.week
+			const weekNumber = req.params.week === 'teens' ? 1 : req.params.week === 'kids' ? 2 : req.params.week
+			const year = req.params.year
+			const groups = await groupModel.findAll({ where: { year: year, week: weekNumber } })
+			const preferences = await preferenceModel.findAll({ where: { groupId: groups.map(group => group.id) } })
+			if (preferences.length) {
+				res.status(400).send('already sorted')
+				return
+			}
+			let participators = Object.values(await findAllParticipators())
+				.filter(p => p.week === weekString && p.status === 1)
+			participators.forEach(participator => {
+				const groupId = participator.groupId || Math.random()
+				participator.groupId = groupId
+				if (participator.wishes === "Ja") {
+					let wishes = []
+					for (let i = 1; i <= 5; i++) {
+						if (participator[`wish${i}`]) wishes.push(participator[`wish${i}`])
+					}
+					wishes.forEach(wish => {
+						const wishParticipator = participators.find(p => {
+							const firstNames = p.firstName.split(' ')
+							const lastName = p.lastName
+							return firstNames.some(firstName => wish.includes(firstName)) && wish.includes(lastName)
+						})
+						if (wishParticipator) {
+							if (wishParticipator.groupId) {
+								const gId = wishParticipator.groupId
+								participators.forEach(p => {
+									if (p.groupId === gId) p.groupId = groupId
+								})
+							} else {
+								const index = participators.findIndex(p => p.orderId === wishParticipator.orderId && p.positionId === wishParticipator.positionId)
+								participators[index].groupId = groupId
+							}
+						}
+					})
+				}
 			})
-		}
-	try {
-		data.where = req.query
-		const group = await groupModel.findAll(data)
-		res.status(200).send(group)
-	} catch(e) {
-		console.log(e);
-		res.status(400).send()
-	}
-}
-
-export async function findOne(req, res) {
-	if (res && !await isAllowed(req)) {
-		res.status(403).send('Not allowed');
-		return;
-	}
-	if (!req.params || !req.params.id ) {
-		res.status(400).send('bad request')
-		return;
-	}
-	const group = await groupModel.findByPk(req.params.id)
-	if (group) {
-		res.status(200).send(group)
-	} else {
-		res.status(404).send('not found')
-	}
-}
-
-export async function create(req, res) {
-	if (res && !await isAllowed(req)) {
-		res.status(403).send('Not allowed');
-		return;
-	}
-	if (!req.body || !req.body.year || !req.body.week) {
-		console.log(req.body);
-		res.status(400).send('bad request')
-		return;
-	}
-	let data = req.body
-	if (!data.groupNumber) {
-		data.groupNumber = null
-	}
-	groupModel.create(data)
-	res.status(200).send()
-}
-
-export async function update(req, res) {
-	if (res && !await isAllowed(req)) {
-		res.status(403).send('Not allowed');
-		return;
-	}
-	if (!req.params || !req.params.id) {
-		res.status(400).send('bad request')
-		return;
-	}
-	const isLT = req.kauth.grant.access_token.content.groups?.includes('Leitungsteam')
-	const group = await groupModel.findByPk(req.params.id)
-	if (group) {
-		if (!isLT) {
-			res.status(403).send()
-			return;
-		}
-		groupModel.update(req.body, {where: {id: req.params.id}});
-		res.status(200).send(group)
-	} else {
-		res.status(404).send('not found')
-	}
-}
-
-export async function deleteOne(req, res) {
-	if (res && !await isAllowed(req)) {
-		res.status(403).send('Not allowed');
-		return;
-	}
-	if (!req.params || !req.params.id) {
-		res.status(400).send('bad request')
-		return;
-	}
-	const isLT = req.kauth.grant.access_token.content.groups?.includes('Leitungsteam')
-	const group = await groupModel.findByPk(req.params.id)
-	if (group) {
-		if (!isLT) {
-			res.status(403).send()
-			return;
-		}
-		groupModel.destroy({where: {id: req.params.id}});
-		res.status(200).send(group)
-	} else {
-		res.status(404).send('not found')
-	}
-}
-
-export async function autoSort(req, res) {
-	if (res && !await isAllowed(req)) {
-		res.status(403).send('Not allowed');
-		return;
-	}
-	if (!req.params || !req.params.year || !req.params.week) {
-		res.status(400).send('bad request')
-		return;
-	}
-	const weekString = req.params.week === 1 ? 'teens' : req.params.week === 2 ? 'kids' : req.params.week
-	const weekNumber = req.params.week === 'teens' ? 1 : req.params.week === 'kids' ? 2 : req.params.week
-	const year = req.params.year
-	const groups = await groupModel.findAll({where: {year: year, week: weekNumber}})
-	const preferences = await preferenceModel.findAll({where: {groupId: groups.map(group => group.id)}})
-	if (preferences.length) {
-		res.status(400).send('already sorted')
-		return;
-	}
-	let participators = Object.values(await findAllParticipators())
-	.filter(p => 
-		p.week === weekString &&
-		p.status === 1
-	)
-	participators.forEach(participator => {
-		const groupId = participator.groupId || Math.random()
-		participator.groupId = groupId
-		if (participator.wishes === "Ja") {
-			let wishes = [];
-			for (let i = 1; i <= 5; i++) {
-				if (participator[`wish${i}`]) {
-					wishes.push(participator[`wish${i}`])
+			const group1 = groups.find(group => group.groupNumber === 1)
+			let groupIds = participators.map(p => p.groupId)
+			groupIds = groupIds.filter((groupId, index) => groupIds.indexOf(groupId) === index)
+			for (const groupId of groupIds) {
+				const currentParticipators = participators.filter(participator => participator.groupId === groupId)
+				if (currentParticipators.length === 1) continue
+				const preference = await preferenceModel.create({ groupId: group1.id })
+				for (const participator of currentParticipators) {
+					await participatorModel.update({ preferenceId: preference.id }, { where: { orderId: participator.orderId, positionId: participator.positionId } })
 				}
 			}
-			wishes.forEach(wish => {
-				const wishParticipator = participators.find(p => {
-					const firstNames = p.firstName.split(' ')
-					const lastName = p.lastName
-					return firstNames.some(firstName => wish.includes(firstName)) && wish.includes(lastName)
-				})
-				if (wishParticipator) {
-					if (wishParticipator.groupId) {
-						const gId = wishParticipator.groupId
-						participators.forEach(p => {
-							if (p.groupId === gId) {
-								p.groupId = groupId
-							}
-						})
-					} else {
-						const index = participators.findIndex(p => p.orderId === wishParticipator.orderId && p.positionId === wishParticipator.positionId)
-						participators[index].groupId = groupId
-					}
-				}
-			})
+			res.status(200).send()
 		}
-	})
-	const group1 = groups.find(group => group.groupNumber === 1)
-	let groupIds = participators.map(p => p.groupId)
-	groupIds = groupIds.filter((groupId, index) => groupIds.indexOf(groupId) === index)
-	groupIds.forEach(async groupId => {
-		const currentParticipators = participators.filter(participator => participator.groupId === groupId)
-		if (currentParticipators.length === 1) {
-			return;
-		}
-		const preference = await preferenceModel.create({groupId: group1.id});
-		for (const participator of currentParticipators) {
-			await participatorModel.update({preferenceId: preference.id}, {where: {orderId: participator.orderId, positionId: participator.positionId}})	
-		}
-	})
-	res.status(200).send()
+	}
 }
+
+export default new GroupController()

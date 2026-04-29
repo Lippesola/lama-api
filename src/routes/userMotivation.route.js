@@ -1,10 +1,12 @@
-import { Router } from 'express';
-import keycloak from '../config/keycloak.js';
-import { findOne, createOrUpdate } from '../controllers/userMotivation.controller.js'
+import keycloak from '../config/keycloak.js'
+import controller from '../controllers/userMotivation.controller.js'
+import createRouter from '../utils/createRouter.js'
+import { requireAuth, selfOrLT } from '../middleware/auth.js'
 
-var router = new Router();
-
-    router.get('/:uuid', keycloak.protect(), findOne);
-    router.post('/:uuid', keycloak.protect(), createOrUpdate);
-
-export default router
+export default createRouter({
+	controller,
+	methods: ['findOne', 'createOrUpdate'],
+	middleware: {
+		findOne: [requireAuth(req => selfOrLT(req, 'uuid'))],
+	},
+})

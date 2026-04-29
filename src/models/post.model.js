@@ -8,21 +8,11 @@ export default sequelize.define('Post', {
     primaryKey: true
   },
   threadId: {
-    type: DataTypes.INTEGER,
-    references: {
-      model: 'Threads',
-      key: 'id'
-    },
-    onDelete: 'CASCADE'
+    type: DataTypes.INTEGER
   },
   createdBy: {
     type: DataTypes.UUID,
-    primaryKey: true,
-    references: {
-        model: 'Users',
-        key: 'uuid'
-    },
-    onDelete: 'CASCADE'
+    primaryKey: true
   },
   text: {
     type: DataTypes.TEXT

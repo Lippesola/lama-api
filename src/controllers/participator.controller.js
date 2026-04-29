@@ -1,29 +1,102 @@
 import pretix from '../config/pretix.js'
 import participatorModel from '../models/participator.model.js';
 import participatorQuestionModel from '../models/participatorQuestion.model.js';
-import userPermissionModel from '../models/userPermission.model.js';
 import settingModel from '../models/setting.model.js';
 import { sendMailToParents } from './mail.controller.js';
 import preferenceModel from '../models/preference.model.js';
+import BaseController from './base.controller.js'
+import { isLTOrHasPermission } from '../middleware/auth.js'
 
 let questionMapperPromise = null;
 function getQuestionMapper() {
 	if (!questionMapperPromise) questionMapperPromise = getPretixMapper();
 	return questionMapperPromise;
 }
-async function isAllowed(req) {
-	const executingUser = req.kauth.grant.access_token.content.sub
-	const isLT = req.kauth.grant.access_token.content.groups?.includes('Leitungsteam')
-	const allowed = isLT || (await userPermissionModel.findOne({where: { uuid: executingUser, permission: 'participator'}}))?.allowed
-	return allowed
+
+class ParticipatorController extends BaseController {
+	constructor() {
+		super({ model: participatorModel, paramKey: ['orderId', 'positionId'] })
+	}
+
+	findOne() {
+		return async (req, res) => {
+			if (res && !await isLTOrHasPermission(req, 'participator')) {
+				res.status(403).send('Not allowed');
+				return;
+			}
+			const participatorAnswers = await getOneParticipatorAnswers(req.params.orderId, req.params.positionId);
+			const participator = (await participatorModel.findOne({
+				where: {
+					orderId: req.params.orderId,
+					positionId: req.params.positionId
+				}
+			}))?.dataValues;
+			if (res) res.status(200).send({...participator, ...participatorAnswers});
+			else return {...participator, ...participatorAnswers};
+		}
+	}
+
+	findAll() {
+		return async (req, res) => {
+			if (!await isLTOrHasPermission(req, 'participator')) {
+				res.status(403).send('Not allowed');
+				return;
+			}
+			const participatorAnswers = await findAllParticipators();
+			res.json(participatorAnswers);
+		}
+	}
+
+	createOrUpdate() {
+		return async (req, res) => {
+			if (!await isLTOrHasPermission(req, 'participator')) {
+				res.status(403).send('Not allowed');
+				return;
+			}
+			const participator = await participatorModel.findOne({
+				where: {
+					orderId: req.params.orderId,
+					positionId: req.params.positionId
+				}
+			});
+			/**
+			 * 0: not confirmed
+			 * 1: confirmed
+			 * 2: cancelled
+			 * 3: waiting list
+			 */
+			let currentStatus = 0;
+			if (participator) {
+				currentStatus = participator.status;
+				await participator.update(req.body);
+			} else {
+				await participatorModel.create({
+					orderId: req.params.orderId,
+					positionId: req.params.positionId,
+					...req.body
+				});
+			}
+			if (req.body.status !== currentStatus) {
+				let sendMail = false;
+				switch (req.body.status) {
+					case 1: sendMail = 'participatorConfirmation'; break;
+					case 3: sendMail = 'participatorQueued'; break;
+					default: break;
+				}
+				if (sendMail) {
+					await sendMailToParents(req.params.orderId, req.params.positionId, sendMail);
+				}
+			}
+			res.status(200).send();
+		}
+	}
 }
 
+export default new ParticipatorController()
 
-export async function findOne(req, res) {
-	if (res && !await isAllowed(req)) {
-		res.status(403).send('Not allowed');
-		return;
-	}
+// Standalone — wird intern aufgerufen (group.controller.js, mail.controller.js)
+
+export async function findOne(req) {
 	const participatorAnswers = await getOneParticipatorAnswers(req.params.orderId, req.params.positionId);
 	const participator = (await participatorModel.findOne({
 		where: {
@@ -31,24 +104,14 @@ export async function findOne(req, res) {
 			positionId: req.params.positionId
 		}
 	}))?.dataValues;
-	if (res) res.status(200).send({...participator, ...participatorAnswers});
-	else return {...participator, ...participatorAnswers};
-}
-
-export async function findAll(req, res) {
-	if (!await isAllowed(req)) {
-		res.status(403).send('Not allowed');
-		return;
-	}
-	const participatorAnswers = await findAllParticipators();
-	res.json(participatorAnswers);
+	return {...participator, ...participatorAnswers};
 }
 
 export async function findAllParticipators() {
 	const participatorAnswers = await getAllParticipatorsAnswers();
 	const participators = await participatorModel.findAll();
 	for (const [key, value] of Object.entries(participatorAnswers)) {
-		let participator = participators.find((participator) => participator.orderId === value.orderId && participator.positionId === value.positionId);
+		let participator = participators.find((p) => p.orderId === value.orderId && p.positionId === value.positionId);
 		const preference = await preferenceModel.findByPk(participator?.preferenceId);
 		participatorAnswers[key] = {...{
 			preferenceId: participator?.preferenceId,
@@ -58,53 +121,6 @@ export async function findAllParticipators() {
 		}, ...value};
 	}
 	return participatorAnswers;
-}
-
-export async function createOrUpdate(req, res) {
-	if (!await isAllowed(req)) {
-		res.status(403).send('Not allowed');
-		return;
-	}
-	const participator = await participatorModel.findOne({
-		where: {
-			orderId: req.params.orderId,
-			positionId: req.params.positionId
-		}
-	});
-	/**
-	 * 0: not confirmed
-	 * 1: confirmed
-	 * 2: cancelled
-	 * 3: waiting list
-	 */
-	let currentStatus = 0;
-	if (participator) {
-		currentStatus = participator.status;
-		await participator.update(req.body);
-	} else {
-		await participatorModel.create({
-			orderId: req.params.orderId,
-			positionId: req.params.positionId,
-			...req.body
-		});
-	}
-	if (req.body.status !== currentStatus) {
-		let sendMail = false;
-		switch (req.body.status) {
-			case 1:
-				sendMail = 'participatorConfirmation'
-				break;
-			case 3:
-				sendMail = 'participatorQueued'
-				break;
-			default:
-				break;
-		}
-		if (sendMail) {
-			await sendMailToParents(req.params.orderId, req.params.positionId, sendMail);
-		}
-	}
-	res.status(200).send();
 }
 
 async function getPretixMapper() {
@@ -144,19 +160,13 @@ async function getOneParticipatorAnswers(orderId, positionId) {
 	const questionMapper = await getQuestionMapper();
 	const order = await fetch(pretix.apiUrl + '/organizers/' + pretix.organizer + '/events/' + pretix.event + '/orders/' + orderId, {
 		method: 'GET',
-		headers: {
-			'Authorization': `Token ${pretix.apiToken}`
-		}
+		headers: { 'Authorization': `Token ${pretix.apiToken}` }
 	})
 	.then(response => {
-		if (!response.ok) {
-			throw new Error('Network response was not ok');
-		}
+		if (!response.ok) throw new Error('Network response was not ok');
 		return response.json();
-	 })
-	.catch((error) => {
-		console.error('Error:', error);
-	});
+	})
+	.catch((error) => { console.error('Error:', error); });
 	let position = order.positions[positionId - 1];
 	return {
 		...mapOrderInfo(order),
@@ -169,19 +179,13 @@ async function getAllParticipatorsAnswers(page = 1, summarized = {}) {
 	const questionMapper = await getQuestionMapper();
 	const orders = await fetch(pretix.apiUrl + '/organizers/' + pretix.organizer + '/events/' + pretix.event + '/orders/?page=' + page, {
 		method: 'GET',
-		headers: {
-			'Authorization': `Token ${pretix.apiToken}`
-		}
+		headers: { 'Authorization': `Token ${pretix.apiToken}` }
 	})
 	.then(response => {
-		if (!response.ok) {
-			throw new Error('Network response was not ok');
-		}
+		if (!response.ok) throw new Error('Network response was not ok');
 		return response.json();
-	 })
-	.catch((error) => {
-		console.error('Error:', error);
-	});
+	})
+	.catch((error) => { console.error('Error:', error); });
 
 	let participators = {};
 	for (let order of orders.results) {
