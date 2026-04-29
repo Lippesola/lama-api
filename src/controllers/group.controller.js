@@ -17,20 +17,20 @@ class GroupController extends BaseController {
 	findAll() {
 		return async (req, res) => {
 			let data = { include: [] }
-			if (typeof req.query.participatorBundle !== 'undefined') {
-				delete req.query.participatorBundle
+			data.where = req.query
+			if (typeof data.where.participatorBundle !== 'undefined') {
+				delete data.where.participatorBundle
 				data.subQuery = false
 				data.include.push({
 					model: preferenceModel,
 					include: [{ model: participatorModel }]
 				})
 			}
-			if (typeof req.query.groupUserBundle !== 'undefined') {
-				delete req.query.groupUserBundle
+			if (typeof data.where.groupUserBundle !== 'undefined') {
+				delete data.where.groupUserBundle
 				data.include.push({ model: groupUserModel })
 			}
 			try {
-				data.where = req.query
 				const group = await groupModel.findAll(data)
 				res.status(200).send(group)
 			} catch (e) {
