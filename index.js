@@ -3,6 +3,7 @@ import express from 'express'
 import fileupload from 'express-fileupload'
 import cors from 'cors'
 import sequelize from './src/models/db.model.js';
+import { ValidationError, UniqueConstraintError } from 'sequelize';
 
 const app = express();
 
@@ -139,6 +140,25 @@ app.use('/preference', preferenceRouter);
 app.use('/thread', threadRouter);
 app.use('/post', postRouter);
 app.use('/userPost', userPostRouter);
+
+app.use((err, req, res, next) => {
+	if (res.headersSent) return next(err)
+	if (err instanceof UniqueConstraintError) {
+		return res.status(409).send(err.errors.map(e => e.path))
+	}
+	if (err instanceof ValidationError) {
+		return res.status(400).send(err.errors.map(e => ({ path: e.path, validator: e.validatorKey })))
+	}
+	console.error(err)
+	res.status(500).send()
+})
+
+process.on('unhandledRejection', (reason) => {
+	console.error('Unhandled rejection:', reason)
+})
+process.on('uncaughtException', (err) => {
+	console.error('Uncaught exception:', err)
+})
 
 // set port, listen for requests
 const PORT = process.env.PORT || 8080;

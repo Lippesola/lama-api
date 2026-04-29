@@ -1,7 +1,6 @@
 import userModel from '../models/user.model.js'
 import userYearModel from '../models/userYear.model.js'
 import settingModel from '../models/setting.model.js'
-import { ValidationError } from 'sequelize';
 import BaseController from './base.controller.js'
 import { isLT, isTeam, isSelf, getTokenContent } from '../middleware/auth.js'
 
@@ -104,41 +103,28 @@ class UserController extends BaseController {
 			}
 			const user = await userModel.findByPk(req.params.uuid)
 			if (user) {
-				try {
-					let data = {}
-					Object.entries(req.body).forEach(([key, value]) => {
-						if (value === null) {
-							data[key] = ''
-						} else {
-							data[key] = value
-						}
-					})
-					await userModel.update(data, { where: { uuid: req.params.uuid } });
-				} catch(e) {
-					if (e instanceof ValidationError) {
-						let returnErrors = []
-						e.errors.forEach((error) => {
-							returnErrors.push(error.path)
-							console.log(error.path, error.validatorKey);
-						})
-						res.status(400).send(returnErrors)
+				let data = {}
+				Object.entries(req.body).forEach(([key, value]) => {
+					if (value === null) {
+						data[key] = ''
+					} else {
+						data[key] = value
 					}
-					res.status(500).send()
-					return
-				}
+				})
+				await userModel.update(data, { where: { uuid: req.params.uuid } });
 				const year = (await settingModel.findByPk('currentYear')).value
 				const userYear = await userYearModel.findOne({
 					where: { uuid: req.params.uuid, year: year }
 				})
 				if (!userYear) {
-					userYearModel.create({
+					await userYearModel.create({
 						uuid: req.params.uuid,
 						year: year,
 						status: 1,
 						editedBy: getTokenContent(req).sub
 					})
 				} else if (userYear.status == 0) {
-					userYearModel.update({ status: 1, editedBy: getTokenContent(req).sub }, {
+					await userYearModel.update({ status: 1, editedBy: getTokenContent(req).sub }, {
 						where: { uuid: req.params.uuid, year: year }
 					})
 				}
@@ -146,7 +132,7 @@ class UserController extends BaseController {
 			} else {
 				var data = req.body
 				data.uuid = req.params.uuid
-				userModel.create(data)
+				await userModel.create(data)
 				res.status(200).send(user)
 			}
 		}

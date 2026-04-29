@@ -11,17 +11,22 @@ class MiscController {
 			if (!isAdmin(req)) {
 				return res.status(403).send({ message: "Forbidden!" });
 			}
-			kcAdminClient.users.find({ max: 300 }).then(function(response) {
-				res.status(200).send('Ok')
-				response.forEach(function(r) {
-					userModel.create({
-						uuid: r.id,
-						firstName: r.firstName,
-						lastName: r.lastName,
-						mail: r.email
-					}).catch(function(e) { console.log(e); })
-				})
-			}).catch(function(e) { console.log(e); })
+			let users
+			try {
+				users = await kcAdminClient.users.find({ max: 300 })
+			} catch (e) {
+				console.log(e)
+				return res.status(500).send()
+			}
+			res.status(200).send('Ok')
+			for (const r of users) {
+				userModel.create({
+					uuid: r.id,
+					firstName: r.firstName,
+					lastName: r.lastName,
+					mail: r.email
+				}).catch(function(e) { console.log(e); })
+			}
 		}
 	}
 

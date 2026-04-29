@@ -136,14 +136,14 @@ class GroupController extends BaseController {
 			const group1 = groups.find(group => group.groupNumber === 1)
 			let groupIds = participators.map(p => p.groupId)
 			groupIds = groupIds.filter((groupId, index) => groupIds.indexOf(groupId) === index)
-			groupIds.forEach(async groupId => {
+			for (const groupId of groupIds) {
 				const currentParticipators = participators.filter(participator => participator.groupId === groupId)
-				if (currentParticipators.length === 1) return
+				if (currentParticipators.length === 1) continue
 				const preference = await preferenceModel.create({ groupId: group1.id })
 				for (const participator of currentParticipators) {
 					await participatorModel.update({ preferenceId: preference.id }, { where: { orderId: participator.orderId, positionId: participator.positionId } })
 				}
-			})
+			}
 			res.status(200).send()
 		}
 	}

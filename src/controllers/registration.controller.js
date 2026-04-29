@@ -21,27 +21,30 @@ class RegistrationController {
 
 			const password = Math.random().toString(36).slice(-8);
 
-			kcAdminClient.users.create({
-				email: req.body.mail,
-				firstName: firstName,
-				lastName: lastName,
-				username: username,
-				enabled: true,
-				requiredActions: ['VERIFY_EMAIL', 'UPDATE_PASSWORD'],
-				credentials: [{ value: password, type: 'password' }]
-			}).then(function(response) {
-				const uuid = response.id
-				res.status(200).send({ uuid: uuid, username: username, password: password })
-				userModel.create({
-					uuid: uuid,
+			let kcResponse
+			try {
+				kcResponse = await kcAdminClient.users.create({
+					email: req.body.mail,
 					firstName: firstName,
 					lastName: lastName,
-					mail: req.body.mail
-				}).catch(function(e) { console.log(e); })
-			}).catch(function(response) {
-				res.status(response.response.status).send(response.response.data.errorMessage)
-				console.log(response);
-			})
+					username: username,
+					enabled: true,
+					requiredActions: ['VERIFY_EMAIL', 'UPDATE_PASSWORD'],
+					credentials: [{ value: password, type: 'password' }]
+				})
+			} catch (e) {
+				console.log(e)
+				return res.status(e.response?.status ?? 500).send(e.response?.data?.errorMessage)
+			}
+
+			const uuid = kcResponse.id
+			userModel.create({
+				uuid: uuid,
+				firstName: firstName,
+				lastName: lastName,
+				mail: req.body.mail
+			}).catch(function(e) { console.log(e); })
+			res.status(200).send({ uuid: uuid, username: username, password: password })
 		}
 	}
 }

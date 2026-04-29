@@ -4,31 +4,6 @@ services:
     build: .
     ports:
       - "8080:8080"
-    environment:
-      DB_HOST: db
-      DB_USER: lama
-      DB_PASS: lama
-      DB_NAME: lama
-      DB_VENDOR: mariadb
-      KEYCLOAK_URL: http://keycloak:8080
-      KEYCLOAK_REALM: lama
-      KEYCLOAK_CLIENTID: lama
-      KEYCLOAK_ADMIN_USER: admin
-      KEYCLOAK_ADMIN_PASS: admin
-      KEYCLOAK_ADMIN_CLIENTID: admin-cli
-      LAMA_APP_URL: http://localhost:9000
-      # SMTP_HOST:
-      # SMTP_PORT: 587
-      # SMTP_USER:
-      # SMTP_PASS:
-      # SMTP_FROM:
-      # SMTP_SECURE: "false"
-      # MAILGUN_API_USER: api
-      # MAILGUN_API_KEY:
-      # PRETIX_API_URL:
-      # PRETIX_API_TOKEN:
-      # PRETIX_ORGANIZER:
-      # PRETIX_EVENT:
     volumes:
       - ./.docker-data/uploads:/lama-api/uploads:Z
     depends_on:
@@ -101,3 +76,19 @@ services:
       timeout: 5s
       retries: 5
     restart: unless-stopped
+    
+  mailpit:
+    image: axllent/mailpit
+    container_name: mailpit
+    restart: unless-stopped
+    volumes:
+        - ./docker-data/mailpit:/data
+    ports:
+        - 8025:8025
+        - 1025:1025
+    environment:
+        MP_MAX_MESSAGES: 5000
+        MP_DATABASE: /data/mailpit.db
+        MP_SMTP_AUTH_ACCEPT_ANY: 1
+        MP_SMTP_AUTH_ALLOW_INSECURE: 1
+        MP_ALLOW_UNTRUSTED_TLS: 1

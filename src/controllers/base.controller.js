@@ -35,13 +35,8 @@ export default class BaseController {
 
 	findAll() {
 		return async (req, res) => {
-			try {
-				const result = await this.model.findAll({ where: req.query, ...this.findAllOptions })
-				res.status(200).send(result)
-			} catch (e) {
-				console.log(e)
-				res.status(400).send()
-			}
+			const result = await this.model.findAll({ where: req.query, ...this.findAllOptions })
+			res.status(200).send(result)
 		}
 	}
 
@@ -59,13 +54,8 @@ export default class BaseController {
 
 	create() {
 		return async (req, res) => {
-			try {
-				const record = await this.model.create(req.body)
-				res.status(200).send(record)
-			} catch (e) {
-				console.log(e)
-				res.status(400).send()
-			}
+			const record = await this.model.create(req.body)
+			res.status(200).send(record)
 		}
 	}
 

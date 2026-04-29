@@ -15,12 +15,13 @@ import supporterDayModel from '../models/supporterDay.model.js';
 import BaseController from './base.controller.js'
 import { isLT, getTokenContent } from '../middleware/auth.js'
 
-const mailgun = new Mailgun(formData);
-const mg = mailgun.client({
-	username: mail.mailgun.username,
-	key: mail.mailgun.key,
-	url: mail.mailgun.url
-})
+const mg = mail.mailgun.enabled
+	? new Mailgun(formData).client({
+		username: mail.mailgun.username,
+		key: mail.mailgun.key,
+		url: mail.mailgun.url
+	})
+	: null
 
 class MailController extends BaseController {
 	constructor() {
@@ -29,6 +30,10 @@ class MailController extends BaseController {
 
 	findAllMailinglists() {
 		return async (req, res) => {
+			if (!mg) {
+				res.status(200).send([])
+				return
+			}
 			const lists = (await mg.lists.list()).items
 			const year = (await settingModel.findByPk('currentYear')).value
 			if (isLT(req)) {
@@ -86,6 +91,10 @@ class MailController extends BaseController {
 				})
 				if (!allowed) return;
 			}
+			if (!mg) {
+				res.status(503).send('mailgun not configured')
+				return
+			}
 			const user = await userModel.findByPk(getTokenContent(req).sub)
 			const messageData = {
 				from: user.firstName + ' ' + user.lastName + ' <' + user.mail + '>',
@@ -113,12 +122,14 @@ export default new MailController()
 // Standalone utility functions — importiert von anderen Controllern (kein req/res)
 
 export function listDomains() {
+	if (!mg) return
 	mg.domains.list()
 	.then(data => console.log(data))
 	.catch(err => console.error(err));
 }
 
 export async function addToMailinglist(mailingList, uuids) {
+	if (!mg) return
 	if (!Array.isArray(uuids)) {
 		uuids = [uuids];
 	}
@@ -161,15 +172,7 @@ export async function sendNewsletterConfirmMail(mailAddress, token) {
 		+ '<p>'
 		+ 'Solltest du keine Anmeldung vorgenommen haben, kannst du diese E-Mail ignorieren.'
 		+ '</p>';
-	const transporter = nodemailer.createTransport({
-		host: mail.default.host,
-		port: mail.default.port,
-		secure: mail.default.secure,
-		auth: {
-			user: mail.default.user,
-			pass: mail.default.pass
-		}
-	});
+	const transporter = nodemailer.createTransport(mail.default);
 	transporter.sendMail({
 		from: '"Lippesola Newsletter" <' + mail.default.from + '>',
 		to: mailAddress,
@@ -189,15 +192,7 @@ export async function sendMailToParents(orderId, positionId, type) {
 	html = html.replaceAll('{{parentLastName}}', participator.parentLastName);
 	html = html.replaceAll('{{participatorFirstName}}', participator.firstName);
 	html = html.replaceAll('{{participatorLastName}}', participator.lastName);
-	const transporter = nodemailer.createTransport({
-		host: mail.booking.host,
-		port: mail.booking.port,
-		secure: mail.booking.secure,
-		auth: {
-			user: mail.booking.user,
-			pass: mail.booking.pass
-		}
-	});
+	const transporter = nodemailer.createTransport(mail.booking);
 	if (type === 'participatorConfirmation') {
 		let buffers = [];
 		let doc = createDocument();
@@ -260,15 +255,7 @@ export async function sendMailToUser(uuid, type, userType = 'user') {
 		html = html.replaceAll('{{supporterContact}}', user.mail + (user.phone ? ', ' + user.phone : '') + (user.mobile ? ', ' + user.mobile : ''));
 	}
 	let text = convert(html);
-	const transporter = nodemailer.createTransport({
-		host: mail.default.host,
-		port: mail.default.port,
-		secure: mail.default.secure,
-		auth: {
-			user: mail.default.user,
-			pass: mail.default.pass
-		}
-	});
+	const transporter = nodemailer.createTransport(mail.default);
 	let info = await transporter.sendMail({
 		from: '"LAMA" <' + mail.default.from + '>',
 		to: user.mail,
