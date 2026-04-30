@@ -33,6 +33,7 @@ export default sequelize.define('User', {
   },
   gender: {
     type: DataTypes.CHAR,
+    allowNull: false,
     validate: {
       notEmpty: true,
       isIn: [['m', 'w']]
@@ -101,6 +102,7 @@ export default sequelize.define('User', {
   },
   churchContact: {
     type: DataTypes.BOOLEAN,
+    allowNull: false,
     validate: {
       notEmpty: true,
     },

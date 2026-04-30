@@ -22,7 +22,9 @@ export default function createRouter({ controller, methods = [], paramPath, auth
 	function buildHandlers(method, handler) {
 		const a = getAuth(method)
 		const mw = getMw(method)
-		return a ? [a, ...mw, handler] : [...mw, handler]
+		if (!a) return [...mw, handler]
+		const authArr = Array.isArray(a) ? a : [a]
+		return [...authArr, ...mw, handler]
 	}
 
 	const routeMap = {
