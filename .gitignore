@@ -44,3 +44,4 @@ jspm_packages
 .thumbs.db
 .env
 .docker-data
+uploads
