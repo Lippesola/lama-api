@@ -1,6 +1,6 @@
 {
   "name": "lama-api",
-  "version": "1.11.0",
+  "version": "1.12.0",
   "description": "Lippesola Administration und Mitarbeiter Anmeldung API",
   "main": "index.js",
   "type": "module",
@@ -24,7 +24,7 @@
     "keycloak-connect": "^26.1.1",
     "mailgun.js": "^12.0.1",
     "mariadb": "^3.4.5",
-    "nodemailer": "^8.0.5",
+    "nodemailer": "^9.0.1",
     "pdfkit": "^0.17.2",
     "sequelize": "^6.37.8"
   }
