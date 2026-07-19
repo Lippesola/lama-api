@@ -4,11 +4,7 @@ import sequelize from './db.model.js';
 export default sequelize.define('UserDocument', {
   uuid: {
     type: DataTypes.UUID,
-    primaryKey: true,
-    references: {
-        model: 'Users',
-        key: 'uuid'
-    }
+    primaryKey: true
   },
   criminalRecord: {
     type: DataTypes.INTEGER

@@ -1,62 +1,48 @@
 import userMotivationModel from '../models/userMotivation.model.js'
-import settingModel from '../models/setting.model.js'
+import BaseController from './base.controller.js'
+import { isLT, selfOrLT } from '../middleware/auth.js'
 
-export async function findAll(req, res) {
-	const isLT = req.kauth.grant.access_token.content.groups?.includes('Leitungsteam')
-	if (!isLT) {
-		res.status(403).send()
-		return;
+class UserMotivationController extends BaseController {
+	constructor() {
+		super({ model: userMotivationModel, paramKey: 'uuid' })
 	}
-	try {
-		const userMotivation = await userMotivationModel.findAll({where: req.query})
-		res.status(200).send(userMotivation)
-	} catch(e) {
-		res.status(400).send()
+
+	findAll() {
+		return async (req, res) => {
+			if (!isLT(req)) {
+				res.status(403).send()
+				return
+			}
+			try {
+				const result = await userMotivationModel.findAll({ where: req.query })
+				res.status(200).send(result)
+			} catch (e) {
+				res.status(400).send()
+			}
+		}
+	}
+
+	createOrUpdate() {
+		return async (req, res) => {
+			if (!selfOrLT(req, 'uuid')) {
+				res.status(403).send()
+				return
+			}
+			if (!req.params?.uuid || !req.body?.motivation) {
+				res.status(400).send('bad request')
+				return
+			}
+			const record = await userMotivationModel.findOne({ where: { uuid: req.params.uuid } })
+			if (record) {
+				await userMotivationModel.update(req.body, { where: { uuid: req.params.uuid } })
+				res.status(200).send(record)
+			} else {
+				const data = { ...req.body, uuid: req.params.uuid }
+				const created = await userMotivationModel.create(data)
+				res.status(200).send(created)
+			}
+		}
 	}
 }
 
-export async function findOne(req, res) {
-	if (!req.params || !req.params.uuid ) {
-		res.status(400).send('bad request')
-		return;
-	}
-	const executingUser = req.kauth.grant.access_token.content.sub
-	const isSelf = executingUser === req.params.uuid
-	const isLT = req.kauth.grant.access_token.content.groups?.includes('Leitungsteam')
-	const allowed = isLT || isSelf
-	if (!allowed) {
-		res.status(403).send()
-		return;
-	}
-	const userMotivation = await userMotivationModel.findOne({where: {uuid: req.params.uuid}})
-	if (userMotivation) {
-		res.status(200).send(userMotivation)
-	} else {
-		res.status(404).send('not found')
-	}
-}
-
-export async function createOrUpdate(req, res) {
-	const executingUser = req.kauth.grant.access_token.content.sub
-	const isSelf = executingUser === req.params.uuid
-	const isLT = req.kauth.grant.access_token.content.groups?.includes('Leitungsteam')
-	const allowed = isLT || isSelf
-	if (!allowed) {
-		res.status(403).send()
-		return;
-	}
-	if (!req.params || !req.params.uuid || !req.body || !req.body.motivation) {
-		res.status(400).send('bad request')
-		return;
-	}
-	const userMotivation = await userMotivationModel.findOne({where: {uuid: req.params.uuid}})
-	if (userMotivation) {
-		userMotivationModel.update(req.body, {where: {uuid: req.params.uuid}});
-		res.status(200).send(userMotivation)
-	} else {
-		var data = req.body
-		data.uuid = req.params.uuid
-		userMotivationModel.create(data)
-		res.status(200).send(userMotivation)
-	}
-}
+export default new UserMotivationController()

@@ -1,9 +1,11 @@
-import { Router } from 'express';
-import keycloak from '../config/keycloak.js';
-import { findOne } from '../controllers/userCriminalRecord.controller.js'
+import keycloak from '../config/keycloak.js'
+import controller from '../controllers/userCriminalRecord.controller.js'
+import createRouter from '../utils/createRouter.js'
 
-var router = new Router();
-
-router.get('/:uuid', keycloak.protect(), findOne);
-
-export default router
+export default createRouter({
+	controller,
+	methods: [],
+	extraRoutes: [
+		{ method: 'get', path: '/:uuid', handler: controller.findOne() },
+	],
+})
