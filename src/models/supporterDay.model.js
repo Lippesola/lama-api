@@ -4,11 +4,7 @@ import sequelize from './db.model.js';
 export default sequelize.define('SupporterDay', {
   uuid: {
     type: DataTypes.UUID,
-    primaryKey: true,
-    references: {
-        model: 'SupporterYears',
-        key: 'uuid'
-    }
+    primaryKey: true
   },
   day: {
     type: DataTypes.DATEONLY,

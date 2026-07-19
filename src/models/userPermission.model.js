@@ -4,11 +4,7 @@ import sequelize from './db.model.js';
 export default sequelize.define('UserPermission', {
   uuid: {
     type: DataTypes.UUID,
-    primaryKey: true,
-    references: {
-        model: 'Users',
-        key: 'uuid'
-    }
+    primaryKey: true
   },
   permission: {
     type: DataTypes.STRING,
