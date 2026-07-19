@@ -15,9 +15,9 @@
   "dependencies": {
     "@keycloak/keycloak-admin-client": "^26.4.7",
     "body-parser": "^2.2.0",
+    "express": "^5.2.1",
     "cors": "^2.8.6",
     "dotenv": "^17.4.2",
-    "express": "^5.2.0",
     "express-fileupload": "^1.5.2",
     "express-session": "^1.18.2",
     "html-to-text": "^9.0.5",
