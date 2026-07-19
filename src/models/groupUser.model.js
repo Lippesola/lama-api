@@ -4,19 +4,11 @@ import sequelize from './db.model.js';
 export default sequelize.define('GroupUser', {
   groupId: {
     type: DataTypes.INTEGER,
-    primaryKey: true,
-    references: {
-        model: 'Groups',
-        key: 'id'
-    }
+    primaryKey: true
   },
   uuid: {
     primaryKey: true,
-    type: DataTypes.UUID,
-    references: {
-        model: 'Users',
-        key: 'uuid'
-    }
+    type: DataTypes.UUID
   },
   /**
    * 1: Team

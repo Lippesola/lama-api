@@ -24,6 +24,7 @@ export default sequelize.define('SupporterYear', {
   },
   gender: {
     type: DataTypes.CHAR,
+    allowNull: false,
     validate: {
       notEmpty: true,
       isIn: [['m', 'w']]
@@ -178,6 +179,12 @@ export default sequelize.define('SupporterYear', {
   internalComment: {
     type: DataTypes.TEXT,
     validate: {}
-  }
-  
+  },
+  referralSource: {
+    type: DataTypes.TEXT,
+    validate: {
+      notEmpty: true,
+    }
+  },
+
 });

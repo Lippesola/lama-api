@@ -4,11 +4,7 @@ import sequelize from './db.model.js';
 export default sequelize.define('UserYear', {
   uuid: {
     type: DataTypes.UUID,
-    primaryKey: true,
-    references: {
-        model: 'Users',
-        key: 'uuid'
-    }
+    primaryKey: true
   },
   year: {
     type: DataTypes.INTEGER,
@@ -199,11 +195,7 @@ export default sequelize.define('UserYear', {
     type: DataTypes.TEXT
   },
   assignee: {
-    type: DataTypes.UUID,
-    references: {
-        model: 'Users',
-        key: 'uuid'
-    }
+    type: DataTypes.UUID
   },
   registeredAt: {
     type: DataTypes.DATE

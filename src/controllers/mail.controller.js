@@ -12,138 +12,124 @@ import { Op } from 'sequelize';
 import { createDocument, getHeader, getParticipatorConfirmation, getSidebar } from './document.controller.js';
 import supporterYearModel from '../models/supporterYear.model.js';
 import supporterDayModel from '../models/supporterDay.model.js';
+import BaseController from './base.controller.js'
+import { isLT, getTokenContent } from '../middleware/auth.js'
 
+const mg = mail.mailgun.enabled
+	? new Mailgun(formData).client({
+		username: mail.mailgun.username,
+		key: mail.mailgun.key,
+		url: mail.mailgun.url
+	})
+	: null
 
-const mailgun = new Mailgun(formData);
-const mg = mailgun.client({
-	username: mail.mailgun.username,
-	key: mail.mailgun.key,
-	url: mail.mailgun.url
-})
+class MailController extends BaseController {
+	constructor() {
+		super({ model: mailModel, paramKey: 'key' })
+	}
 
-export async function findAll(req, res) {
-	try {
-		const setting = await mailModel.findAll({where: req.query})
-		res.status(200).send(setting)
-	} catch(e) {
-		res.status(400).send()
+	findAllMailinglists() {
+		return async (req, res) => {
+			if (!mg) {
+				res.status(200).send([])
+				return
+			}
+			const lists = (await mg.lists.list()).items
+			const year = (await settingModel.findByPk('currentYear')).value
+			if (isLT(req)) {
+				res.status(200).send(lists)
+				return;
+			}
+			var ret = lists.filter(list => list.address.toLowerCase().startsWith('team' + year + '@'))
+			const mailPermissions = await userPermissionModel.findAll({
+				where: {
+					uuid: getTokenContent(req).sub,
+					allowed: true,
+					permission: {
+						[Op.like]: 'mailinglist.%'
+					}
+				}
+			})
+			mailPermissions.forEach(permission => {
+				const list = lists.find(list => list.address.toLowerCase().startsWith(permission.permission.toLowerCase().split('.')[1]))
+				if (list) ret.push(list)
+			})
+			res.status(200).send(ret)
+		}
+	}
+
+	sendMail() {
+		return async (req, res) => {
+			if (!req.body || !req.body.addresses.length || !req.body.subject || req.body.content === '<br>') {
+				let missingKeys = []
+				if (!req.body.addresses.length) missingKeys.push('addresses')
+				if (!req.body.subject) missingKeys.push('subject')
+				if (req.body.content == '<br>') missingKeys.push('content')
+				res.status(400).send(missingKeys)
+				return;
+			}
+			const year = (await settingModel.findByPk('currentYear')).value
+			const addresses = req.body.addresses
+			if (!isLT(req)) {
+				const mailPermissions = await userPermissionModel.findAll({
+					where: {
+						uuid: getTokenContent(req).sub,
+						allowed: true,
+						permission: {
+							[Op.like]: 'mailinglist.%'
+						}
+					}
+				})
+				let allowed = true;
+				addresses.forEach(address => {
+					if (!address.toLowerCase().startsWith('team' + year + '@')) {
+						if (!mailPermissions.find(permission => permission.permission.toLowerCase().split('.')[1] === address.toLowerCase().split('@')[0])) {
+							res.status(403).send('forbidden to send to this addresses')
+							allowed = false;
+						}
+					}
+				})
+				if (!allowed) return;
+			}
+			if (!mg) {
+				res.status(503).send('mailgun not configured')
+				return
+			}
+			const user = await userModel.findByPk(getTokenContent(req).sub)
+			const messageData = {
+				from: user.firstName + ' ' + user.lastName + ' <' + user.mail + '>',
+				to: addresses.toString(),
+				bcc: user.mail,
+				subject: req.body.subject,
+				html: req.body.content,
+				text: convert(req.body.content),
+				'h:Reply-To': user.mail
+			};
+			mg.messages.create('verteiler.lippesola.de', messageData)
+			.then((mgRes) => {
+				res.status(200).send('mail sent');
+				return;
+			})
+			.catch((err) => {
+				console.error(err);
+			});
+		}
 	}
 }
 
-export async function findOne(req, res) {
-	if (!req.params || !req.params.key) {
-		res.status(400).send('bad request')
-		return;
-	}
-	const setting = await mailModel.findByPk(req.params.key)
-	if (setting) {
-		res.status(200).send(setting)
-	} else {
-		res.status(404).send('not found')
-	}
-}
+export default new MailController()
 
-export async function createOrUpdate(req, res) {
-	if (!req.params || !req.params.key) {
-		res.status(400).send('bad request')
-		return;
-	}
-	const setting = await mailModel.findByPk(req.params.key)
-	if (setting) {
-		mailModel.update(req.body, {where: {key: req.params.key}});
-		res.status(200).send(setting)
-	} else {
-		var data = req.body
-		data.key = req.params.key
-		mailModel.create(data)
-		res.status(200).send(setting)
-	}
-}
+// Standalone utility functions — importiert von anderen Controllern (kein req/res)
 
 export function listDomains() {
+	if (!mg) return
 	mg.domains.list()
 	.then(data => console.log(data))
 	.catch(err => console.error(err));
 }
 
-export async function findAllMailinglists(req, res) {
-	const lists = (await mg.lists.list()).items
-	const year = (await settingModel.findByPk('currentYear')).value
-	const isLT = req.kauth.grant.access_token.content.groups?.includes('Leitungsteam')
-	if (isLT) {
-		res.status(200).send(lists)
-		return;
-	}
-	var ret = lists.filter(list => list.address.toLowerCase().startsWith('team' + year + '@'))
-	const mailPermissions = await userPermissionModel.findAll({
-		where: {
-			uuid: req.kauth.grant.access_token.content.sub,
-			allowed: true,
-			permission: {
-				[Op.like]: 'mailinglist.%'
-			}
-		}
-	})
-	mailPermissions.forEach(permission => {
-		const list = lists.find(list => list.address.toLowerCase().startsWith(permission.permission.toLowerCase().split('.')[1]))
-		if (list) ret.push(list)
-	})
-	res.status(200).send(ret)
-}
-
-export async function sendMail(req, res) {
-	if (!req.body || !req.body.addresses.length || !req.body.subject || req.body.content === '<br>') {
-		let missingKeys = []
-		if (!req.body.addresses.length) missingKeys.push('addresses')
-		if (!req.body.subject) missingKeys.push('subject')
-		if (req.body.content == '<br>') missingKeys.push('content')
-		res.status(400).send(missingKeys)
-		return;
-	}
-	const year = (await settingModel.findByPk('currentYear')).value
-	const isLT = req.kauth.grant.access_token.content.groups?.includes('Leitungsteam')
-	const addresses = req.body.addresses
-	if (!isLT) {
-		const mailPermissions = await userPermissionModel.findAll({
-			where: {
-				uuid: req.kauth.grant.access_token.content.sub,
-				allowed: true,
-				permission: {
-					[Op.like]: 'mailinglist.%'
-				}
-			}
-		})	
-		let allowed = true;
-		addresses.forEach(address => {
-			if (!address.toLowerCase().startsWith('team' + year + '@')) {
-				if (!mailPermissions.find(permission => permission.permission.toLowerCase().split('.')[1] === address.toLowerCase().split('@')[0])) {
-					res.status(403).send('forbidden to send to this addresses')
-					allowed = false;
-				}
-			}
-		})
-		if (!allowed) return;
-	}
-	const user = await userModel.findByPk(req.kauth.grant.access_token.content.sub)
-	const messageData = {
-		from: user.firstName + ' ' + user.lastName + ' <' + user.mail + '>',
-		to: addresses.toString(),
-		bcc: user.mail,
-		subject: req.body.subject,
-		html: req.body.content,
-		text: convert(req.body.content),
-		'h:Reply-To': user.mail
-	};
-	mg.messages.create('verteiler.lippesola.de', messageData)
-	.then((mgRes) => {
-		res.status(200).send('mail sent');
-		return;
-	})
-	.catch((err) => {
-		console.error(err);
-	});}
-
 export async function addToMailinglist(mailingList, uuids) {
+	if (!mg) return
 	if (!Array.isArray(uuids)) {
 		uuids = [uuids];
 	}
@@ -151,9 +137,7 @@ export async function addToMailinglist(mailingList, uuids) {
 		console.log(uuid);
 		let user = {};
 		if (uuid.includes('@')) {
-			user = {
-				mail: uuid
-			}
+			user = { mail: uuid }
 		} else {
 			user = await userModel.findByPk(uuid);
 		}
@@ -188,15 +172,7 @@ export async function sendNewsletterConfirmMail(mailAddress, token) {
 		+ '<p>'
 		+ 'Solltest du keine Anmeldung vorgenommen haben, kannst du diese E-Mail ignorieren.'
 		+ '</p>';
-	const transporter = nodemailer.createTransport({
-		host: mail.default.host,
-		port: mail.default.port,
-		secure: mail.default.secure,
-		auth: {
-			user: mail.default.user,
-			pass: mail.default.pass
-		}
-	});
+	const transporter = nodemailer.createTransport(mail.default);
 	transporter.sendMail({
 		from: '"Lippesola Newsletter" <' + mail.default.from + '>',
 		to: mailAddress,
@@ -204,7 +180,6 @@ export async function sendNewsletterConfirmMail(mailAddress, token) {
 		text: convert(html),
 		html: html
 	});
-	
 }
 
 export async function sendMailToParents(orderId, positionId, type) {
@@ -217,15 +192,7 @@ export async function sendMailToParents(orderId, positionId, type) {
 	html = html.replaceAll('{{parentLastName}}', participator.parentLastName);
 	html = html.replaceAll('{{participatorFirstName}}', participator.firstName);
 	html = html.replaceAll('{{participatorLastName}}', participator.lastName);
-	const transporter = nodemailer.createTransport({
-		host: mail.booking.host,
-		port: mail.booking.port,
-		secure: mail.booking.secure,
-		auth: {
-			user: mail.booking.user,
-			pass: mail.booking.pass
-		}
-	});
+	const transporter = nodemailer.createTransport(mail.booking);
 	if (type === 'participatorConfirmation') {
 		let buffers = [];
 		let doc = createDocument();
@@ -275,11 +242,9 @@ export async function sendMailToUser(uuid, type, userType = 'user') {
 	html = html.replaceAll('{{lastName}}', user.lastName);
 	if (userType === 'supporter') {
 		const supporterDays = await supporterDayModel.findAll({
-			where: {
-				uuid: user.uuid
-			}
+			where: { uuid: user.uuid }
 		});
-		const days = supporterDays.map(element => 
+		const days = supporterDays.map(element =>
 			new Date(element.day).toLocaleDateString('de-DE', {
 				day: '2-digit',
 				month: '2-digit',
@@ -287,19 +252,10 @@ export async function sendMailToUser(uuid, type, userType = 'user') {
 			})
 		);
 		html = html.replaceAll('{{supporterDays}}', days.length > 0 ? days.join(', ') : 'Keine Termine eingetragen');
-
 		html = html.replaceAll('{{supporterContact}}', user.mail + (user.phone ? ', ' + user.phone : '') + (user.mobile ? ', ' + user.mobile : ''));
 	}
 	let text = convert(html);
-	const transporter = nodemailer.createTransport({
-		host: mail.default.host,
-		port: mail.default.port,
-		secure: mail.default.secure,
-		auth: {
-			user: mail.default.user,
-			pass: mail.default.pass
-		}
-	});
+	const transporter = nodemailer.createTransport(mail.default);
 	let info = await transporter.sendMail({
 		from: '"LAMA" <' + mail.default.from + '>',
 		to: user.mail,
@@ -308,6 +264,5 @@ export async function sendMailToUser(uuid, type, userType = 'user') {
 		text: text,
 		html: html
 	});
-
 	console.log(info);
 }
