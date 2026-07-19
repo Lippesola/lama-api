@@ -28,6 +28,7 @@ class SupporterYearController extends BaseController {
 					status: 1
 				})
 			}
+			sendMailToUser(supporterYear.uuid, 'confirmation', 'supporter')
 			res.status(200).send()
 		}
 	}
@@ -42,7 +43,6 @@ class SupporterYearController extends BaseController {
 			}
 			if (!record.isConfirmed && req.body.isConfirmed) {
 				addToSupportMailinglist(record.mail, year)
-				sendMailToUser(req.params.uuid, 'confirmation', 'supporter')
 			}
 			const { days, ...rest } = req.body
 			await record.update(rest)
