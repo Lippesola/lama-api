@@ -4,11 +4,7 @@ import sequelize from './db.model.js';
 export default sequelize.define('UserMotivation', {
   uuid: {
     type: DataTypes.UUID,
-    primaryKey: true,
-    references: {
-        model: 'Users',
-        key: 'uuid'
-    }
+    primaryKey: true
   },
   motivation: {
     type: DataTypes.JSON
