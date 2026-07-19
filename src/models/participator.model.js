@@ -22,11 +22,7 @@ export default sequelize.define('Participator', {
      */
   },
   preferenceId: {
-    type: DataTypes.INTEGER,
-    references: {
-        model: 'Preferences',
-        key: 'id'
-    }
+    type: DataTypes.INTEGER
   },
   ignoredWishes: {
     type: DataTypes.STRING,

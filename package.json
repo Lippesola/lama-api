@@ -1,11 +1,13 @@
 {
   "name": "lama-api",
-  "version": "1.2.4",
+  "version": "1.12.0",
   "description": "Lippesola Administration und Mitarbeiter Anmeldung API",
   "main": "index.js",
   "type": "module",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "start": "node index.js",
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "dev": "nodemon -r dotenv/config index.js"
   },
   "keywords": [],
   "author": "",
@@ -14,16 +16,16 @@
     "@keycloak/keycloak-admin-client": "^26.4.7",
     "body-parser": "^2.2.0",
     "cors": "^2.8.5",
+    "dotenv": "^17.4.2",
     "express": "^5.2.0",
-    "dotenv": "^17.2.3",
     "express-fileupload": "^1.5.2",
     "express-session": "^1.18.2",
     "html-to-text": "^9.0.5",
-    "nodemailer": "^8.0.3",
+    "keycloak-connect": "^26.1.1",
     "mailgun.js": "^12.0.1",
     "mariadb": "^3.4.5",
+    "nodemailer": "^9.0.1",
     "pdfkit": "^0.17.2",
-    "keycloak-connect": "^26.1.1",
     "sequelize": "^6.37.8"
   }
 }
