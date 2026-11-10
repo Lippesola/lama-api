@@ -1,4 +1,5 @@
 import userPermissionModel from '../models/userPermission.model.js'
+import settingModel from '../models/setting.model.js'
 
 export function getTokenContent(req) {
 	return req.kauth.grant.access_token.content
@@ -43,3 +44,16 @@ export function requireAuth(checkFn) {
 		}
 	}
 }
+
+export const requireAdmin = requireAuth(isAdmin)
+
+export async function isActiveTeam(req) {
+	if (isLT(req)) return true
+	const year = (await settingModel.findByPk('currentYear'))?.value
+	return !!year && !!isTeam(req, year)
+}
+
+export const requireTeam = requireAuth(isActiveTeam)
+
+export const requireSelfOrTeam = (uuidParam = 'uuid') =>
+	requireAuth(async req => isSelf(req, uuidParam) || await isActiveTeam(req))
