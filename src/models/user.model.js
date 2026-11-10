@@ -33,7 +33,8 @@ export default sequelize.define('User', {
   },
   gender: {
     type: DataTypes.CHAR,
-    allowNull: false,
+    // May be empty right after registration, enforced on profile update (user.controller.js)
+    allowNull: true,
     validate: {
       notEmpty: true,
       isIn: [['m', 'w']]
@@ -102,7 +103,8 @@ export default sequelize.define('User', {
   },
   churchContact: {
     type: DataTypes.BOOLEAN,
-    allowNull: false,
+    // May be empty right after registration, enforced on profile update (user.controller.js)
+    allowNull: true,
     validate: {
       notEmpty: true,
     },

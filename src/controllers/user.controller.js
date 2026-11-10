@@ -111,6 +111,15 @@ class UserController extends BaseController {
 						data[key] = value
 					}
 				})
+				// gender and churchContact may be empty after registration, but not after the first profile update
+				const missing = ['gender', 'churchContact'].filter((key) => {
+					const value = key in data ? data[key] : user[key]
+					return value === null || value === undefined || value === ''
+				})
+				if (missing.length > 0) {
+					res.status(400).send({ message: 'missing fields: ' + missing.join(', ') })
+					return;
+				}
 				await userModel.update(data, { where: { uuid: req.params.uuid } });
 				const year = (await settingModel.findByPk('currentYear')).value
 				const userYear = await userYearModel.findOne({
