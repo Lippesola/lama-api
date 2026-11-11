@@ -1,4 +1,4 @@
-FROM node:24
+FROM node:24.22.2
 
 # Create app directory
 WORKDIR /lama-api
