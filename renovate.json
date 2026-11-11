@@ -5,23 +5,21 @@
   ],
   "packageRules": [
     {
-      "description": "Automerge non-major npm updates",
-      "matchManagers": ["npm"],
-      "matchUpdateTypes": ["minor", "patch", "pin", "digest"],
+      "description": "Pin Docker images to digest",
+      "matchManagers": ["dockerfile", "docker-compose"],
+      "pinDigests": true
+    },
+    {
+      "description": "Automerge non-major npm and Dockerfile updates",
+      "matchManagers": ["npm", "dockerfile"],
+      "matchUpdateTypes": ["minor", "patch", "pin", "pinDigest", "digest"],
       "automerge": true,
       "ignoreTests": true
     },
     {
-      "description": "Pin node image in Dockerfile to digest",
-      "matchManagers": ["dockerfile"],
-      "matchDepNames": ["node"],
-      "pinDigests": true
-    },
-    {
-      "description": "Automerge non-major node image updates",
-      "matchManagers": ["dockerfile"],
-      "matchDepNames": ["node"],
-      "matchUpdateTypes": ["minor", "patch", "pin", "pinDigest", "digest"],
+      "description": "Automerge docker-compose digest pins and digest updates",
+      "matchManagers": ["docker-compose"],
+      "matchUpdateTypes": ["pinDigest", "digest"],
       "automerge": true,
       "ignoreTests": true
     }
