@@ -78,7 +78,7 @@ services:
     restart: unless-stopped
     
   mailpit:
-    image: axllent/mailpit@sha256:aef2aacc11f075ec0fb6874275ee4a421e688e11a96ebb296134d1735c7761ce
+    image: axllent/mailpit:v1
     container_name: mailpit
     restart: unless-stopped
     volumes:
