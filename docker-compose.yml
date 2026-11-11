@@ -14,7 +14,7 @@ services:
     restart: unless-stopped
 
   db:
-    image: mariadb:11.8
+    image: mariadb:11.8@sha256:c4124d1afa875e47f2892edf26b482fa54f796e2f342d3717a04ca091a22a9bd
     environment:
       MARIADB_ROOT_PASSWORD: root
       MARIADB_DATABASE: lama
@@ -63,7 +63,7 @@ services:
     restart: unless-stopped
 
   keycloak-db:
-    image: postgres:18-alpine
+    image: postgres:18-alpine@sha256:9ba53c7d41ea093baf5c1ba635ba5434c4f979880527d49bb7d9237d3193085b
     environment:
       POSTGRES_DB: keycloak
       POSTGRES_USER: keycloak
@@ -78,7 +78,7 @@ services:
     restart: unless-stopped
     
   mailpit:
-    image: axllent/mailpit
+    image: axllent/mailpit@sha256:aef2aacc11f075ec0fb6874275ee4a421e688e11a96ebb296134d1735c7761ce
     container_name: mailpit
     restart: unless-stopped
     volumes:
