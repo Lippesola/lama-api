@@ -1,19 +1,22 @@
-FROM node:24.22.2@sha256:8fa96264f302f58bbb13aa7339c541547b56975766ce956c875da149452a3e40
+FROM node:24.22.2-slim
 
-# Create app directory
+ENV NODE_ENV=production
 WORKDIR /lama-api
 
-# Install app dependencies
-# A wildcard is used to ensure both package.json AND package-lock.json are copied
-# where available (npm@5+)
-COPY package*.json ./
-
-RUN npm ci --omit=dev
+# Install production dependencies from the lockfile
+COPY --chown=node:node package*.json ./
+RUN npm ci --omit=dev && npm cache clean --force
 
 # Bundle app source
-COPY . .
+COPY --chown=node:node . .
+RUN mkdir -p uploads/avatar && chown -R node:node uploads
+
+USER node
 
 EXPOSE 8080
-ENTRYPOINT [ "node", "index.js" ]
+HEALTHCHECK --interval=30s --timeout=5s --start-period=30s \
+  CMD node -e "fetch('http://localhost:8080/').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))"
+
+ENTRYPOINT ["node", "index.js"]
 
 LABEL org.opencontainers.image.source="https://github.com/Lippesola/lama-api"
