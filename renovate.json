@@ -22,6 +22,12 @@
       "matchUpdateTypes": ["pinDigest", "digest"],
       "automerge": true,
       "ignoreTests": true
+    },
+    {
+      "description": "No version updates for docker-compose images, only digests",
+      "matchManagers": ["docker-compose"],
+      "matchUpdateTypes": ["major", "minor", "patch"],
+      "enabled": false
     }
   ],
   "lockFileMaintenance": {
