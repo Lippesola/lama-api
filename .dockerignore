@@ -1,0 +1,20 @@
+# Installed fresh by `npm ci` in the image
+node_modules
+npm-debug.log*
+*.log
+
+# Secrets and local runtime data
+.env
+.docker-data
+uploads
+
+# Not needed at runtime
+.git
+.github
+.vscode
+docker
+docker-compose.yml
+Dockerfile
+.dockerignore
+README.md
+renovate.json
