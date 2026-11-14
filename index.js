@@ -64,6 +64,7 @@ app.post('/mailingListToken', mailingListTokenController.create())
 import keycloak from './src/config/keycloak.js'
 app.use(keycloak.middleware())
 
+import adminRouter from './src/routes/admin.route.js'
 import avatarRouter from './src/routes/avatar.route.js'
 import eventRouter from './src/routes/event.route.js'
 import featureRouter from './src/routes/feature.route.js'
@@ -113,6 +114,7 @@ import threadModel from './src/models/thread.model.js';
 import postModel from './src/models/post.model.js';
 import userPostModel from './src/models/userPost.model.js';
 
+app.use('/admin', adminRouter);
 app.use('/avatar', avatarRouter);
 app.use('/event', eventRouter);
 app.use('/feature', featureRouter);

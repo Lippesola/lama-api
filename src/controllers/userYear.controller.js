@@ -88,6 +88,8 @@ class UserYearController extends BaseController {
 			req.body.registeredAt = userYear.registeredAt;
 			var data = req.body
 			if (userYear) {
+				// assignee may only be changed until the user has been activated
+				if (userYear.status === 4) delete data.assignee
 				if (userYear.status === 2) {
 					data['status'] = 3;
 					data['registeredAt'] = new Date();
@@ -109,6 +111,7 @@ class UserYearController extends BaseController {
 							})
 						}
 					})
+					if (!userYear.assignee && !data.assignee) data['assignee'] = getTokenContent(req).sub
 					addToTeamMailinglist(req.params.uuid, year);
 					sendMailToUser(req.params.uuid, 'confirmation');
 				}
