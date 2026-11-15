@@ -191,6 +191,9 @@ export default sequelize.define('UserYear', {
   wishOtherText: {
     type: DataTypes.TEXT
   },
+  bandInstrument: {
+    type: DataTypes.TEXT
+  },
   comment: {
     type: DataTypes.TEXT
   },
@@ -199,5 +202,10 @@ export default sequelize.define('UserYear', {
   },
   registeredAt: {
     type: DataTypes.DATE
+  },
+  isTM: {
+    type: DataTypes.BOOLEAN,
+    allowNull: false,
+    defaultValue: false
   },
 });

@@ -87,6 +87,8 @@ class UserYearController extends BaseController {
 			const userYear = await userYearModel.findOne({ where: { uuid: req.params.uuid, year: year } })
 			req.body.registeredAt = userYear.registeredAt;
 			var data = req.body
+			// only the LT may mark a registration as TM
+			if (!isLT(req)) delete data.isTM
 			if (userYear) {
 				// assignee may only be changed until the user has been activated
 				if (userYear.status === 4) delete data.assignee
@@ -139,10 +141,10 @@ class UserYearController extends BaseController {
 				where: {
 					uuid: req.params.uuid,
 					status: 4,
+					isTM: false,
 					year: { [Op.ne]: (await settingModel.findByPk('currentYear')).value }
 				}
 			})
-			console.log(userYear);
 			const isNew = !userYear.length;
 			res.status(200).send({ isLeader: isLeader, isNew: isNew });
 		}
